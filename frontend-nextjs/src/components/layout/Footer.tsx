@@ -1,99 +1,79 @@
-"use client";
-
 import Link from "next/link";
-import {
-  FOOTER_LINKS,
-  SOCIAL_LINKS,
-  CONTACT_INFO,
-  SITE_NAME,
-} from "@/constants";
 
 export default function Footer() {
   return (
-    <footer className="bg-neutral-950 text-white">
-      <div className="max-w-7xl mx-auto px-6 py-16">
+    <footer className="bg-gray-900 text-white mt-20">
 
-        <div className="grid md:grid-cols-4 gap-10">
+      <div className="max-w-7xl mx-auto px-6 py-14">
 
-          {/* Bloc marque */}
+        <div className="grid md:grid-cols-3 gap-10">
+
+          {/* Logo */}
           <div>
-            <h3 className="text-2xl font-bold mb-4">
-              {SITE_NAME}
-            </h3>
+            <h2 className="text-2xl font-bold mb-4">
+              HelpFunds
+            </h2>
 
-            <p className="text-neutral-400 text-sm leading-7">
-              Construire un impact humain, durable et international.
+            <p className="text-gray-400">
+              Construisons un avenir meilleur grâce à
+              des actions concrètes.
             </p>
           </div>
 
           {/* Liens */}
-          {FOOTER_LINKS.map((section) => (
-            <div key={section.title}>
-              <h4 className="font-semibold mb-4">
-                {section.title}
-              </h4>
+          <div>
+            <h3 className="font-semibold mb-4">
+              Navigation
+            </h3>
 
-              <ul className="space-y-3">
-                {section.links.map(
-                  (
-                    link: {
-                      label: string;
-                      href: string;
-                    }
-                  ) => (
-                    <li key={link.href}>
-                      <Link
-                        href={link.href}
-                        className="text-neutral-400 hover:text-white"
-                      >
-                        {link.label}
-                      </Link>
-                    </li>
-                  )
-                )}
-              </ul>
+            <div className="space-y-2">
+
+              <Link href="/" className="block text-gray-400">
+                Accueil
+              </Link>
+
+              <Link href="/projets" className="block text-gray-400">
+                Projets
+              </Link>
+
+              <Link href="/contact" className="block text-gray-400">
+                Contact
+              </Link>
+
             </div>
-          ))}
+          </div>
 
           {/* Contact */}
           <div>
-            <h4 className="font-semibold mb-4">
+
+            <h3 className="font-semibold mb-4">
               Contact
-            </h4>
+            </h3>
 
-            <div className="space-y-3 text-neutral-400 text-sm">
-              <p>{CONTACT_INFO.email}</p>
-              <p>{CONTACT_INFO.phone}</p>
-              <p>{CONTACT_INFO.address}</p>
-            </div>
+            <p className="text-gray-400">
+              📍 Internationnal
+            </p>
 
-            <div className="flex gap-4 mt-6">
-              {SOCIAL_LINKS.map(
-                (
-                  social: {
-                    label: string;
-                    href: string;
-                  }
-                ) => (
-                  <Link
-                    key={social.label}
-                    href={social.href}
-                    className="hover:text-primary-400"
-                  >
-                    {social.label}
-                  </Link>
-                )
-              )}
-            </div>
+            <p className="text-gray-400">
+              ✉ contact@helpfunds.org
+            </p>
+
+            <p className="text-gray-400">
+              ☎ +228 90 00 00 00
+            </p>
+
           </div>
 
         </div>
 
-        <div className="border-t border-neutral-800 mt-12 pt-6 text-center text-sm text-neutral-500">
-          © 2026 {SITE_NAME}. Tous droits réservés.
+        <div className="border-t border-gray-700 mt-10 pt-6 text-center text-gray-500">
+
+          © 2026 HelpFunds
+
         </div>
 
       </div>
+
     </footer>
   );
 }
