@@ -92,7 +92,7 @@ export default function DonationImpactSlider() {
             A quoi servent vos dons
           </p>
           <h2 className="font-heading font-bold text-white text-3xl md:text-4xl mb-3">
-            Chaque euro compte
+            Chaque don compte
           </h2>
           <p className="text-neutral-400 max-w-2xl mx-auto">
             Decouvrez concretement les actions financees par vos dons sur le terrain.
