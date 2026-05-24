@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import DonationForm from "@/components/sections/DonationForm";
+import DonationImpactSlider from "@/components/sections/DonationImpactSlider";
 
 export const metadata: Metadata = {
   title: "Faire un don — Help Funds",
@@ -25,27 +26,44 @@ export default function DonPage() {
               <span className="text-secondary-400"> des vies</span>
             </h1>
             <p className="text-xl text-white/70 max-w-2xl mx-auto">
-              Chaque contribution, petite ou grande, permet de financer
-              des projets concrets en education, sante et developpement durable.
+              Chaque contribution permet de financer des projets concrets
+              en education, sante et developpement durable.
             </p>
           </div>
         </section>
 
-        {/* Formulaire */}
+        {/* Slider impact des dons */}
+        <DonationImpactSlider />
+
+        {/* Formulaire de don */}
         <DonationForm />
 
-        {/* Confiance */}
+        {/* Garanties */}
         <section className="bg-neutral-50 py-16">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
               {[
-                { emoji: "🔒", title: "Paiement securise", desc: "Vos donnees bancaires sont protegees par un chiffrement SSL 256 bits." },
-                { emoji: "📋", title: "Recu fiscal", desc: "Un recu fiscal vous est envoye automatiquement par email apres votre don." },
-                { emoji: "🌍", title: "Impact garanti", desc: "98% de votre don est utilise directement sur le terrain dans nos projets." },
+                {
+                  emoji: "🔒",
+                  title: "Paiement securise",
+                  desc: "Vos donnees bancaires sont protegees par un chiffrement SSL 256 bits.",
+                },
+                {
+                  emoji: "📋",
+                  title: "Recu fiscal",
+                  desc: "Un recu fiscal vous est envoye automatiquement par email apres votre don.",
+                },
+                {
+                  emoji: "🌍",
+                  title: "Impact garanti",
+                  desc: "98% de votre don est utilise directement sur le terrain dans nos projets.",
+                },
               ].map((item) => (
                 <div key={item.title} className="bg-white rounded-2xl p-6 border border-neutral-100 shadow-sm">
                   <div className="text-4xl mb-4">{item.emoji}</div>
-                  <h3 className="font-heading font-bold text-neutral-900 mb-2 text-lg">{item.title}</h3>
+                  <h3 className="font-heading font-bold text-neutral-900 mb-2 text-lg">
+                    {item.title}
+                  </h3>
                   <p className="text-neutral-500 text-sm leading-relaxed">{item.desc}</p>
                 </div>
               ))}
