@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import DonationForm from "@/components/sections/DonationForm";
@@ -21,12 +21,10 @@ export default function DonPage() {
               98% des dons vont directement sur le terrain
             </div>
             <h1 className="font-heading font-bold text-white mb-4">
-              Votre don change
-              <span className="text-secondary-400"> des vies</span>
+              Votre don change <span className="text-secondary-400">des vies</span>
             </h1>
             <p className="text-xl text-white/70 max-w-2xl mx-auto">
-              Chaque contribution permet de financer des projets concrets
-              en education, sante et developpement durable.
+              Chaque contribution permet de financer des projets concrets en education, sante et developpement durable.
             </p>
           </div>
         </section>
