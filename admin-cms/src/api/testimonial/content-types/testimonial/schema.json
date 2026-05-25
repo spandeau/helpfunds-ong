@@ -1,23 +1,23 @@
 {
   "kind": "collectionType",
-  "collectionName": "sliders",
+  "collectionName": "testimonials",
   "info": {
-    "singularName": "slider",
-    "pluralName": "sliders",
-    "displayName": "Slider"
+    "singularName": "testimonial",
+    "pluralName": "testimonials",
+    "displayName": "Testimonial"
   },
   "options": {
     "draftAndPublish": true
   },
   "pluginOptions": {},
   "attributes": {
-    "title": {
+    "name": {
       "type": "string"
     },
-    "subtitle": {
+    "country": {
       "type": "string"
     },
-    "image": {
+    "photo": {
       "type": "media",
       "multiple": true,
       "allowedTypes": [
@@ -27,19 +27,10 @@
         "audios"
       ]
     },
-    "description": {
-      "type": "string"
+    "message": {
+      "type": "blocks"
     },
-    "buttonText": {
-      "type": "string"
-    },
-    "buttonLink": {
-      "type": "string"
-    },
-    "order": {
-      "type": "integer"
-    },
-    "active": {
+    "featured": {
       "type": "boolean"
     }
   }

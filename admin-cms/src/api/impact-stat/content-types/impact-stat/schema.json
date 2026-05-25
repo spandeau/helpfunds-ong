@@ -1,0 +1,30 @@
+{
+  "kind": "collectionType",
+  "collectionName": "impact_stats",
+  "info": {
+    "singularName": "impact-stat",
+    "pluralName": "impact-stats",
+    "displayName": "ImpactStat"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "beneficiaries": {
+      "type": "integer"
+    },
+    "countries": {
+      "type": "integer"
+    },
+    "projects": {
+      "type": "integer"
+    },
+    "volunteers": {
+      "type": "integer"
+    },
+    "donations": {
+      "type": "integer"
+    }
+  }
+}

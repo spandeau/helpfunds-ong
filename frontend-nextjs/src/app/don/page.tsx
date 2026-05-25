@@ -6,7 +6,7 @@ import FAQSection from "@/components/sections/FAQSection";
 
 export const metadata: Metadata = {
   title: "Faire un don — Help Funds",
-  description: "Soutenez nos projets humanitaires. Chaque don compte et change des vies.",
+  description: "Soutenez nos projets humanitaires.",
 };
 
 export default function DonPage() {

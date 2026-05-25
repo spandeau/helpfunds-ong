@@ -1,0 +1,43 @@
+{
+  "kind": "collectionType",
+  "collectionName": "donations",
+  "info": {
+    "singularName": "donation",
+    "pluralName": "donations",
+    "displayName": "Donation"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "donorName": {
+      "type": "string"
+    },
+    "email": {
+      "type": "email"
+    },
+    "amount": {
+      "type": "integer"
+    },
+    "currency": {
+      "type": "string"
+    },
+    "paymentMethod": {
+      "type": "string"
+    },
+    "transactionId": {
+      "type": "uid",
+      "targetField": "donorName"
+    },
+    "statusd": {
+      "type": "enumeration",
+      "enum": [
+        "noon"
+      ]
+    },
+    "anonymous": {
+      "type": "boolean"
+    }
+  }
+}

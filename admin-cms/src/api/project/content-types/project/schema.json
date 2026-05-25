@@ -1,0 +1,58 @@
+{
+  "kind": "collectionType",
+  "collectionName": "projects",
+  "info": {
+    "singularName": "project",
+    "pluralName": "projects",
+    "displayName": "Project"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "uid"
+    },
+    "description": {
+      "type": "blocks"
+    },
+    "image": {
+      "type": "media",
+      "multiple": true,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "category": {
+      "type": "enumeration",
+      "enum": [
+        "morning "
+      ]
+    },
+    "country": {
+      "type": "string"
+    },
+    "beneficiaries": {
+      "type": "integer"
+    },
+    "targetAmount": {
+      "type": "integer"
+    },
+    "collectedAmount": {
+      "type": "integer"
+    },
+    "featured": {
+      "type": "boolean"
+    },
+    "published": {
+      "type": "boolean"
+    }
+  }
+}
