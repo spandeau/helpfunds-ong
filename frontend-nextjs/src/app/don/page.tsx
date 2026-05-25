@@ -1,92 +1,39 @@
-export default function DonationPage() {
-return (
+import type { Metadata } from "next";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import DonationForm from "@/components/sections/DonationForm";
+import FAQSection from "@/components/sections/FAQSection";
 
-<main className="pt-32 pb-20">
+export const metadata: Metadata = {
+  title: "Faire un don — Help Funds",
+  description: "Soutenez nos projets humanitaires. Chaque don compte et change des vies.",
+};
 
-<div className="max-w-6xl mx-auto px-6">
-
-<div className="text-center mb-16">
-
-<p className="text-primary-600 font-semibold mb-3">
-FAIRE UN DON
-</p>
-
-<h1 className="text-5xl font-bold mb-5">
-Changez une vie aujourd’hui
-</h1>
-
-<p className="text-neutral-600 max-w-2xl mx-auto">
-Votre contribution finance directement les actions sur le terrain.
-</p>
-
-</div>
-
-<div className="grid lg:grid-cols-2 gap-10">
-
-<div className="bg-white rounded-3xl p-8 shadow-xl">
-
-<h2 className="text-2xl font-bold mb-6">
-Montant du don
-</h2>
-
-<div className="grid grid-cols-2 gap-4">
-
-{["10€","25€","50€","100€"].map((v)=>(
-
-<button
-key={v}
-className="
-p-6
-rounded-2xl
-border
-hover:border-primary-500
-hover:bg-primary-50
-"
->
-{v}
-</button>
-
-))}
-
-</div>
-
-<button
-className="
-mt-8
-w-full
-bg-secondary-600
-text-white
-py-5
-rounded-2xl
-font-bold
-"
->
-Continuer
-</button>
-
-</div>
-
-<div>
-
-<div className="bg-primary-950 rounded-3xl p-8 text-white">
-
-<h3 className="text-3xl font-bold mb-5">
-98%
-</h3>
-
-<p>
-des fonds vont directement sur le terrain.
-</p>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</main>
-
-);
+export default function DonPage() {
+  return (
+    <>
+      <Navbar />
+      <main>
+        <section className="bg-gradient-to-br from-primary-950 via-primary-900 to-primary-800 pt-32 pb-16">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-2 text-white text-sm font-medium mb-6">
+              <span className="w-2 h-2 bg-secondary-400 rounded-full animate-pulse" />
+              98% des dons vont directement sur le terrain
+            </div>
+            <h1 className="font-heading font-bold text-white mb-4">
+              Votre don change
+              <span className="text-secondary-400"> des vies</span>
+            </h1>
+            <p className="text-xl text-white/70 max-w-2xl mx-auto">
+              Chaque contribution permet de financer des projets concrets
+              en education, sante et developpement durable.
+            </p>
+          </div>
+        </section>
+        <DonationForm />
+        <FAQSection />
+      </main>
+      <Footer />
+    </>
+  );
 }
