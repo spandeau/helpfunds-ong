@@ -41,6 +41,12 @@
     },
     "active": {
       "type": "boolean"
+    },
+    "statValue": {
+      "type": "string"
+    },
+    "statLabel": {
+      "type": "string"
     }
   }
 }
