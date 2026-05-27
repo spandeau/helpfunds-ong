@@ -31,7 +31,7 @@ export default function DonPage() {
         <DonationForm />
         <FAQSection />
       </main>
-      <Foter />
+      <Footer />
     </>
   );
 }
