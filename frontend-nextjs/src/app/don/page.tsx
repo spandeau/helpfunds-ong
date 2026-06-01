@@ -1,6 +1,6 @@
 ﻿import type { Metadata } from "next";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+
+
 import DonationForm from "@/components/sections/DonationForm";
 import FAQSection from "@/components/sections/FAQSection";
 
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function DonPage() {
   return (
     <>
-      <Navbar />
+      
       <main>
         <section className="bg-gradient-to-br from-primary-950 via-primary-900 to-primary-800 pt-32 pb-16">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -31,7 +31,7 @@ export default function DonPage() {
         <DonationForm />
         <FAQSection />
       </main>
-      <Footer />
+      
     </>
   );
 }

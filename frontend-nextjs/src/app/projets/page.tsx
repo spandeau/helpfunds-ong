@@ -1,17 +1,17 @@
-import type { Metadata } from "next";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+﻿import type { Metadata } from "next";
+
+
 import ProjectsGrid from "@/components/sections/ProjectsGrid";
 
 export const metadata: Metadata = {
-  title: "Nos Projets — Help Funds",
+  title: "Nos Projets â€” Help Funds",
   description: "Decouvrez tous les projets humanitaires soutenus par Help Funds dans 35 pays.",
 };
 
 export default function ProjetsPage() {
   return (
     <>
-      <Navbar />
+      
       <main>
         {/* Hero */}
         <section className="bg-gradient-to-br from-primary-950 via-primary-900 to-primary-800 pt-32 pb-20">
@@ -32,7 +32,7 @@ export default function ProjetsPage() {
 
         <ProjectsGrid />
       </main>
-      <Footer />
+      
     </>
   );
 }

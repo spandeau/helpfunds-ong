@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+
+
 import { motion } from "framer-motion";
 import { Search, Calendar, MapPin, Camera, BookOpen, Star, ArrowRight, X } from "lucide-react";
 import { BLOG_POSTS, BLOG_CATEGORIES, BLOG_THEMES, BLOG_COUNTRIES } from "@/lib/blog-data";
@@ -47,7 +47,7 @@ export default function ActualitesPage() {
 
   return (
     <>
-      <Navbar />
+      
       <main>
 
         {/* Hero */}
@@ -180,7 +180,7 @@ export default function ActualitesPage() {
                             <span>{new Date(featured[0].publishedAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</span>
                             {featured[0].country && (
                               <>
-                                <span>·</span>
+                                <span>Â·</span>
                                 <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{featured[0].country}</span>
                               </>
                             )}
@@ -204,7 +204,7 @@ export default function ActualitesPage() {
                   </Link>
                 )}
 
-                {/* Autres à la une */}
+                {/* Autres Ã  la une */}
                 {featured.length > 1 && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {featured.slice(1).map((post, index) => (
@@ -232,10 +232,10 @@ export default function ActualitesPage() {
               </div>
             )}
 
-            {/* Aucun résultat */}
+            {/* Aucun rÃ©sultat */}
             {filtered.length === 0 && (
               <div className="text-center py-20 bg-white rounded-2xl border border-neutral-100">
-                <div className="text-5xl mb-4">📰</div>
+                <div className="text-5xl mb-4">ðŸ“°</div>
                 <h3 className="font-heading font-bold text-xl mb-2">Aucune publication trouvee</h3>
                 <p className="text-neutral-500 mb-6">Essayez de modifier vos criteres de recherche.</p>
                 <button onClick={resetFilters} className="bg-primary-600 text-white font-semibold px-6 py-3 rounded-xl">
@@ -246,7 +246,7 @@ export default function ActualitesPage() {
           </div>
         </section>
       </main>
-      <Footer />
+      
     </>
   );
 }
@@ -299,7 +299,7 @@ function BlogCard({ post, index }: { post: typeof BLOG_POSTS[0]; index: number }
               <span>{new Date(post.publishedAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}</span>
               {post.country && (
                 <>
-                  <span>·</span>
+                  <span>Â·</span>
                   <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{post.country}</span>
                 </>
               )}
