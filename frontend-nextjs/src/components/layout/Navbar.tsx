@@ -2,580 +2,164 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Menu, X, Heart, ChevronDown } from "lucide-react";
 import { NAV_LINKS } from "@/constants";
+import Logo from "@/components/ui/Logo";
 
 export default function Navbar() {
-
-const [isOpen,setIsOpen]=useState(false);
-
-const [scrolled,setScrolled]=useState(false);
-
-const [activeDropdown,setActiveDropdown]=useState<string|null>(null);
-
-useEffect(()=>{
-
-const handleScroll=()=>{
-
-setScrolled(window.scrollY>30);
-
-};
-
-window.addEventListener("scroll",handleScroll);
-
-return()=>window.removeEventListener("scroll",handleScroll);
-
-},[]);
-
-return(
-
-<header
-
-className={
-
-`
-fixed
-top-0
-left-0
-right-0
-z-50
-
-transition-all
-duration-500
-
-${
-
-scrolled
-
-?
-
-"bg-white shadow-lg py-3"
-
-:
-
-"bg-gradient-to-r from-primary-950/95 via-primary-900/95 to-primary-800/95 backdrop-blur-md py-4"
-
-}
-
-`
-
-}
-
->
-
-<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-<nav className="flex items-center justify-between">
-
-<Link
-href="/"
-
-className="
-flex
-items-center
-gap-3
-min-w-0
-"
-
->
-
-<div
-className="
-relative
-
-w-10
-h-10
-
-sm:w-12
-sm:h-12
-
-flex-shrink-0
-"
->
-
-<Image
-src="/logo.png"
-alt="logo"
-fill
-priority
-className="object-contain"
-/>
-
-</div>
-
-<div className="min-w-0">
-
-<h1
-
-className={
-
-`
-font-bold
-
-leading-none
-
-truncate
-
-text-lg
-
-sm:text-xl
-
-${
-scrolled
-
-?
-
-"text-neutral-900"
-
-:
-
-"text-white"
-
-}
-
-`
-
-}
-
->
-
-Help
-
-<span
-className={
-
-scrolled
-
-?
-
-"text-primary-600"
-
-:
-
-"text-secondary-400"
-
-}
-
->
-
-Funds
-
-</span>
-
-</h1>
-
-<p
-
-className={
-
-`
-text-[10px]
-
-sm:text-xs
-
-truncate
-
-mt-1
-
-${
-scrolled
-
-?
-
-"text-neutral-400"
-
-:
-
-"text-white/60"
-
-}
-
-`
-
-}
-
->
-
-ONG Internationale
-
-</p>
-
-</div>
-
-</Link>
-
-<ul className="hidden lg:flex items-center gap-1">
-
-{NAV_LINKS.map((link)=>(
-
-<li
-key={link.href}
-className="relative"
->
-
-{link.children?(
-
-<div
-
-onMouseEnter={()=>
-setActiveDropdown(link.label)
-}
-
-onMouseLeave={()=>
-setActiveDropdown(null)
-}
-
->
-
-<button
-
-className={
-
-`
-px-4
-py-2
-
-rounded-xl
-
-flex
-items-center
-gap-1
-
-transition
-
-${
-scrolled
-
-?
-
-"text-neutral-700 hover:bg-primary-50"
-
-:
-
-"text-white hover:bg-white/10"
-
-}
-
-`
-
-}
-
->
-
-{link.label}
-
-<ChevronDown size={16}/>
-
-</button>
-
-{
-
-activeDropdown===link.label&&(
-
-<div
-
-className="
-absolute
-top-full
-left-0
-
-mt-3
-
-w-56
-
-bg-white
-
-rounded-2xl
-
-shadow-xl
-
-overflow-hidden
-"
-
->
-
-{
-
-link.children.map((child)=>(
-
-<Link
-
-key={child.href}
-
-href={child.href}
-
-className="
-block
-
-px-5
-
-py-4
-
-hover:bg-primary-50
-"
-
->
-
-{child.label}
-
-</Link>
-
-))
-
-}
-
-</div>
-
-)
-
-}
-
-</div>
-
-):(
-
-<Link
-
-href={link.href}
-
-className={
-
-`
-px-4
-py-2
-
-rounded-xl
-
-transition
-
-${
-scrolled
-
-?
-
-"text-neutral-700 hover:bg-primary-50"
-
-:
-
-"text-white hover:bg-white/10"
-
-}
-
-`
-
-}
-
->
-
-{link.label}
-
-</Link>
-
-)}
-
-</li>
-
-))}
-
-</ul>
-
-<div className="hidden lg:flex items-center gap-3">
-
-<Link
-
-href="/contact"
-
-className="px-5 py-3 rounded-xl border border-primary-500 text-primary-600"
-
->
-
-Contact
-
-</Link>
-
-<Link
-
-href="/don"
-
-className="
-bg-secondary-600
-
-text-white
-
-px-5
-
-py-3
-
-rounded-xl
-
-flex
-
-items-center
-
-gap-2
-"
-
->
-
-<Heart size={16}/>
-
-Faire un don
-
-</Link>
-
-</div>
-
-<button
-
-onClick={()=>
-setIsOpen(!isOpen)
-}
-
-className="lg:hidden"
-
->
-
-{
-
-isOpen
-
-?
-
-<X color="white"/>
-
-:
-
-<Menu color="white"/>
-
-}
-
-</button>
-
-</nav>
-
-{
-
-isOpen&&(
-
-<div
-
-className="
-lg:hidden
-
-mt-4
-
-bg-white
-
-rounded-3xl
-
-shadow-2xl
-
-p-5
-"
-
->
-
-<div className="space-y-2">
-
-{
-
-NAV_LINKS.map((link)=>(
-
-<Link
-
-key={link.href}
-
-href={link.href}
-
-onClick={()=>
-setIsOpen(false)
-}
-
-className="
-block
-
-px-4
-
-py-4
-
-rounded-xl
-
-hover:bg-primary-50
-"
-
->
-
-{link.label}
-
-</Link>
-
-))
-
-}
-
-</div>
-
-<div className="mt-6 space-y-3">
-
-<Link
-
-href="/contact"
-
-className="
-block
-
-text-center
-
-py-4
-
-rounded-xl
-
-border
-"
-
->
-
-Contact
-
-</Link>
-
-<Link
-
-href="/don"
-
-className="
-block
-
-text-center
-
-py-4
-
-rounded-xl
-
-bg-secondary-600
-
-text-white
-"
-
->
-
-Faire un don
-
-</Link>
-
-</div>
-
-</div>
-
-)
-
-}
-
-</div>
-
-</header>
-
-);
-
+  const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 30);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  return (
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? "bg-white/95 backdrop-blur-md shadow-sm border-b border-neutral-100"
+          : "bg-transparent"
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-20">
+
+          <Logo size="md" variant={scrolled ? "dark" : "light"} />
+
+          <nav className="hidden lg:flex items-center gap-1">
+            {NAV_LINKS.map((link) => (
+              <div key={link.label} className="relative group">
+                {link.children ? (
+                  <>
+                    <button
+                      onClick={() => setActiveDropdown(activeDropdown === link.label ? null : link.label)}
+                      className={`flex items-center gap-1 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                        scrolled
+                          ? "text-neutral-700 hover:bg-neutral-100 hover:text-primary-600"
+                          : "text-white/90 hover:bg-white/10 hover:text-white"
+                      }`}
+                    >
+                      {link.label}
+                      <ChevronDown className={`w-4 h-4 transition-transform ${activeDropdown === link.label ? "rotate-180" : ""}`} />
+                    </button>
+                    {activeDropdown === link.label && (
+                      <div className="absolute top-full left-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-neutral-100 py-2 z-50">
+                        {link.children.map((child) => (
+                          <Link
+                            key={child.label}
+                            href={child.href}
+                            onClick={() => setActiveDropdown(null)}
+                            className="block px-4 py-2.5 text-sm text-neutral-700 hover:bg-primary-50 hover:text-primary-600 transition-colors"
+                          >
+                            {child.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <Link
+                    href={link.href}
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                      scrolled
+                        ? "text-neutral-700 hover:bg-neutral-100 hover:text-primary-600"
+                        : "text-white/90 hover:bg-white/10 hover:text-white"
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                )}
+              </div>
+            ))}
+          </nav>
+
+          <div className="hidden lg:flex items-center gap-3">
+            <Link
+              href="/contact"
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all border ${
+                scrolled
+                  ? "border-neutral-200 text-neutral-700 hover:border-primary-300 hover:text-primary-600"
+                  : "border-white/30 text-white/90 hover:bg-white/10"
+              }`}
+            >
+              Contact
+            </Link>
+            <Link
+              href="/don"
+              className="inline-flex items-center gap-2 bg-secondary-600 hover:bg-secondary-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition-all shadow-lg hover:-translate-y-0.5"
+            >
+              <Heart className="w-4 h-4 fill-white" />
+              Faire un don
+            </Link>
+          </div>
+
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className={`lg:hidden p-2 rounded-xl transition-colors ${
+              scrolled ? "text-neutral-700 hover:bg-neutral-100" : "text-white hover:bg-white/10"
+            }`}
+            aria-label="Menu"
+          >
+            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
+      </div>
+
+      {isOpen && (
+        <div className="lg:hidden bg-white border-t border-neutral-100 shadow-xl">
+          <div className="max-w-7xl mx-auto px-4 py-4 space-y-1">
+            {NAV_LINKS.map((link) => (
+              <div key={link.label}>
+                {link.children ? (
+                  <>
+                    <button
+                      onClick={() => setActiveDropdown(activeDropdown === link.label ? null : link.label)}
+                      className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium text-neutral-700 hover:bg-neutral-50 transition-colors"
+                    >
+                      {link.label}
+                      <ChevronDown className={`w-4 h-4 transition-transform ${activeDropdown === link.label ? "rotate-180" : ""}`} />
+                    </button>
+                    {activeDropdown === link.label && (
+                      <div className="ml-4 mt-1 space-y-1">
+                        {link.children.map((child) => (
+                          <Link
+                            key={child.label}
+                            href={child.href}
+                            onClick={() => { setIsOpen(false); setActiveDropdown(null); }}
+                            className="block px-4 py-2.5 text-sm text-neutral-600 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-colors"
+                          >
+                            {child.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <Link
+                    href={link.href}
+                    onClick={() => setIsOpen(false)}
+                    className="block px-4 py-3 rounded-xl text-sm font-medium text-neutral-700 hover:bg-neutral-50 hover:text-primary-600 transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                )}
+              </div>
+            ))}
+            <div className="pt-4 pb-2 flex flex-col gap-3 border-t border-neutral-100 mt-4">
+              <Link href="/contact" onClick={() => setIsOpen(false)} className="block text-center px-4 py-3 border border-neutral-200 rounded-xl text-sm font-medium text-neutral-700 hover:border-primary-300 transition-colors">
+                Contact
+              </Link>
+              <Link href="/don" onClick={() => setIsOpen(false)} className="flex items-center justify-center gap-2 bg-secondary-600 hover:bg-secondary-700 text-white font-bold px-4 py-3 rounded-xl text-sm transition-all">
+                <Heart className="w-4 h-4 fill-white" />Faire un don
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+    </header>
+  );
 }
