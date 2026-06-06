@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 interface LogoProps {
   size?: "sm" | "md" | "lg";
@@ -7,33 +8,30 @@ interface LogoProps {
 }
 
 const SIZES = {
-  sm: { text: "text-base", sub: "text-[10px]", gap: "gap-1.5" },
-  md: { text: "text-xl", sub: "text-xs", gap: "gap-2" },
-  lg: { text: "text-3xl", sub: "text-sm", gap: "gap-2.5" },
+  sm: { width: 100, height: 32 },
+  md: { width: 140, height: 44 },
+  lg: { width: 200, height: 64 },
 };
 
 export default function Logo({ size = "md", href = "/", variant = "dark" }: LogoProps) {
   const s = SIZES[size];
-  const mainColor = variant === "light" ? "text-white" : "text-primary-700";
-  const accentColor = variant === "light" ? "text-secondary-400" : "text-secondary-600";
-  const subColor = variant === "light" ? "text-white/60" : "text-neutral-400";
 
-  const content = (
-    <div className={`flex flex-col items-start ${s.gap}`}>
-      <span className={`font-heading font-black leading-none tracking-tight ${s.text} ${mainColor}`}>
-        HELP<span className={accentColor}>FUNDS</span>
-      </span>
-      <span className={`font-medium uppercase tracking-widest leading-none ${s.sub} ${subColor}`}>
-        ONG Internationale
-      </span>
-    </div>
+  const image = (
+    <Image
+      src="/logo.png"
+      alt="Help Funds ONG Internationale"
+      width={s.width}
+      height={s.height}
+      className={`object-contain transition-all ${variant === "light" ? "brightness-0 invert" : ""}`}
+      priority
+    />
   );
 
-  if (!href) return content;
+  if (!href) return image;
 
   return (
     <Link href={href} aria-label="Help Funds ONG Internationale">
-      {content}
+      {image}
     </Link>
   );
 }
