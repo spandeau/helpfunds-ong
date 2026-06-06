@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Heart } from "lucide-react";
 
 interface LogoProps {
   size?: "sm" | "md" | "lg";
@@ -8,34 +7,32 @@ interface LogoProps {
 }
 
 const SIZES = {
-  sm: { icon: "w-7 h-7", iconInner: "w-3.5 h-3.5", text: "text-base", sub: "text-[10px]" },
-  md: { icon: "w-10 h-10", iconInner: "w-5 h-5", text: "text-lg", sub: "text-xs" },
-  lg: { icon: "w-14 h-14", iconInner: "w-7 h-7", text: "text-2xl", sub: "text-sm" },
+  sm: { text: "text-base", sub: "text-[10px]", gap: "gap-1.5" },
+  md: { text: "text-xl", sub: "text-xs", gap: "gap-2" },
+  lg: { text: "text-3xl", sub: "text-sm", gap: "gap-2.5" },
 };
 
 export default function Logo({ size = "md", href = "/", variant = "dark" }: LogoProps) {
   const s = SIZES[size];
-  const textColor = variant === "light" ? "text-white" : "text-neutral-900";
-  const subColor = variant === "light" ? "text-white/60" : "text-neutral-500";
+  const mainColor = variant === "light" ? "text-white" : "text-primary-700";
+  const accentColor = variant === "light" ? "text-secondary-400" : "text-secondary-600";
+  const subColor = variant === "light" ? "text-white/60" : "text-neutral-400";
 
   const content = (
-    <div className="flex items-center gap-2.5">
-      <div className={`${s.icon} bg-primary-600 rounded-xl flex items-center justify-center flex-shrink-0`}>
-        <Heart className={`${s.iconInner} text-white fill-white`} />
-      </div>
-      <div>
-        <p className={`${s.text} font-heading font-bold leading-none ${textColor}`}>
-          Help<span className="text-primary-400">Funds</span>
-        </p>
-        <p className={`${s.sub} ${subColor} mt-0.5`}>ONG Internationale</p>
-      </div>
+    <div className={`flex flex-col items-start ${s.gap}`}>
+      <span className={`font-heading font-black leading-none tracking-tight ${s.text} ${mainColor}`}>
+        HELP<span className={accentColor}>FUNDS</span>
+      </span>
+      <span className={`font-medium uppercase tracking-widest leading-none ${s.sub} ${subColor}`}>
+        ONG Internationale
+      </span>
     </div>
   );
 
   if (!href) return content;
 
   return (
-    <Link href={href} aria-label="HELPFUNDS ONG Internationale">
+    <Link href={href} aria-label="Help Funds ONG Internationale">
       {content}
     </Link>
   );

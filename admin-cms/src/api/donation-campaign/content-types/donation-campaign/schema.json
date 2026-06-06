@@ -1,0 +1,35 @@
+{
+  "kind": "collectionType",
+  "collectionName": "donation_campaigns",
+  "info": {
+    "singularName": "donation-campaign",
+    "pluralName": "donation-campaigns",
+    "displayName": "Campagne de Dons"
+  },
+  "options": { "draftAndPublish": true },
+  "attributes": {
+    "title": { "type": "string", "required": true },
+    "slug": { "type": "uid", "targetField": "title", "required": true },
+    "description": { "type": "text" },
+    "goalAmount": { "type": "decimal", "required": true },
+    "raisedAmount": { "type": "decimal", "default": 0 },
+    "currency": { "type": "string", "default": "EUR" },
+    "status": {
+      "type": "enumeration",
+      "enum": ["draft", "active", "paused", "completed", "cancelled"],
+      "default": "draft"
+    },
+    "startDate": { "type": "date" },
+    "endDate": { "type": "date" },
+    "project": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::project.project"
+    },
+    "coverImage": { "type": "media", "multiple": false, "allowedTypes": ["images"] },
+    "isGeneral": { "type": "boolean", "default": false },
+    "donationCount": { "type": "integer", "default": 0 },
+    "minimumAmount": { "type": "decimal", "default": 1 },
+    "suggestedAmounts": { "type": "json" }
+  }
+}

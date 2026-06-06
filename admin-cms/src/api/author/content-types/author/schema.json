@@ -4,35 +4,25 @@
   "info": {
     "singularName": "author",
     "pluralName": "authors",
-    "displayName": "Author",
-    "description": "Create authors for your content"
+    "displayName": "Auteur"
   },
-  "options": {
-    "draftAndPublish": false
-  },
-  "pluginOptions": {},
+  "options": { "draftAndPublish": false },
   "attributes": {
-    "name": {
-      "type": "string"
-    },
-    "avatar": {
-      "type": "media",
-      "multiple": false,
-      "required": false,
-      "allowedTypes": [
-        "images",
-        "files",
-        "videos"
-      ]
-    },
-    "email": {
-      "type": "string"
+    "name": { "type": "string", "required": true },
+    "email": { "type": "email" },
+    "bio": { "type": "text" },
+    "avatar": { "type": "media", "multiple": false, "allowedTypes": ["images"] },
+    "role": {
+      "type": "enumeration",
+      "enum": ["super_admin", "gestionnaire", "moderateur", "comptable", "contributeur"],
+      "default": "contributeur"
     },
     "articles": {
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::article.article",
       "mappedBy": "author"
-    }
+    },
+    "active": { "type": "boolean", "default": true }
   }
 }

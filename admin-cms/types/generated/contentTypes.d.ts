@@ -472,7 +472,7 @@ export interface ApiAboutAbout extends Struct.SingleTypeSchema {
 export interface ApiArticleArticle extends Struct.CollectionTypeSchema {
   collectionName: 'articles';
   info: {
-    description: 'Create your blog content';
+    description: 'Articles blog et actualites';
     displayName: 'Article';
     pluralName: 'articles';
     singularName: 'article';
@@ -482,14 +482,18 @@ export interface ApiArticleArticle extends Struct.CollectionTypeSchema {
   };
   attributes: {
     author: Schema.Attribute.Relation<'manyToOne', 'api::author.author'>;
-    blocks: Schema.Attribute.DynamicZone<
-      ['shared.media', 'shared.quote', 'shared.rich-text', 'shared.slider']
-    >;
     category: Schema.Attribute.Relation<'manyToOne', 'api::category.category'>;
-    cover: Schema.Attribute.Media<'images' | 'files' | 'videos'>;
+    content: Schema.Attribute.RichText & Schema.Attribute.Required;
+    country: Schema.Attribute.String;
+    coverImage: Schema.Attribute.Media<'images'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    eventDate: Schema.Attribute.DateTime;
+    eventLocation: Schema.Attribute.String;
+    excerpt: Schema.Attribute.Text & Schema.Attribute.Required;
+    featured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    gallery: Schema.Attribute.Media<'images' | 'videos', true>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -497,8 +501,13 @@ export interface ApiArticleArticle extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
-    slug: Schema.Attribute.UID<'title'>;
-    title: Schema.Attribute.String;
+    seo: Schema.Attribute.Component<'shared.seo', false>;
+    slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
+    tags: Schema.Attribute.JSON;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+    type: Schema.Attribute.Enumeration<['article', 'evenement', 'photo']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'article'>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -508,8 +517,7 @@ export interface ApiArticleArticle extends Struct.CollectionTypeSchema {
 export interface ApiAuthorAuthor extends Struct.CollectionTypeSchema {
   collectionName: 'authors';
   info: {
-    description: 'Create authors for your content';
-    displayName: 'Author';
+    displayName: 'Auteur';
     pluralName: 'authors';
     singularName: 'author';
   };
@@ -517,20 +525,26 @@ export interface ApiAuthorAuthor extends Struct.CollectionTypeSchema {
     draftAndPublish: false;
   };
   attributes: {
+    active: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
     articles: Schema.Attribute.Relation<'oneToMany', 'api::article.article'>;
-    avatar: Schema.Attribute.Media<'images' | 'files' | 'videos'>;
+    avatar: Schema.Attribute.Media<'images'>;
+    bio: Schema.Attribute.Text;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    email: Schema.Attribute.String;
+    email: Schema.Attribute.Email;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::author.author'
     > &
       Schema.Attribute.Private;
-    name: Schema.Attribute.String;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
     publishedAt: Schema.Attribute.DateTime;
+    role: Schema.Attribute.Enumeration<
+      ['super_admin', 'gestionnaire', 'moderateur', 'comptable', 'contributeur']
+    > &
+      Schema.Attribute.DefaultTo<'contributeur'>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -563,6 +577,112 @@ export interface ApiCategoryCategory extends Struct.CollectionTypeSchema {
     name: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     slug: Schema.Attribute.UID;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiDonationCampaignDonationCampaign
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'donation_campaigns';
+  info: {
+    displayName: 'Campagne de Dons';
+    pluralName: 'donation-campaigns';
+    singularName: 'donation-campaign';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    coverImage: Schema.Attribute.Media<'images'>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    currency: Schema.Attribute.String & Schema.Attribute.DefaultTo<'EUR'>;
+    description: Schema.Attribute.Text;
+    donationCount: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    endDate: Schema.Attribute.Date;
+    goalAmount: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    isGeneral: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::donation-campaign.donation-campaign'
+    > &
+      Schema.Attribute.Private;
+    minimumAmount: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<1>;
+    project: Schema.Attribute.Relation<'manyToOne', 'api::project.project'>;
+    publishedAt: Schema.Attribute.DateTime;
+    raisedAmount: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+    slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
+    startDate: Schema.Attribute.Date;
+    status: Schema.Attribute.Enumeration<
+      ['draft', 'active', 'paused', 'completed', 'cancelled']
+    > &
+      Schema.Attribute.DefaultTo<'draft'>;
+    suggestedAmounts: Schema.Attribute.JSON;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiDonationTransactionDonationTransaction
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'donation_transactions';
+  info: {
+    displayName: 'Transaction Don';
+    pluralName: 'donation-transactions';
+    singularName: 'donation-transaction';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    amount: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    anonymous: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    campaign: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::donation-campaign.donation-campaign'
+    >;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    currency: Schema.Attribute.String & Schema.Attribute.DefaultTo<'EUR'>;
+    donorEmail: Schema.Attribute.Email;
+    donorFirstName: Schema.Attribute.String;
+    donorLastName: Schema.Attribute.String;
+    donorPhone: Schema.Attribute.String;
+    fiscalReceiptDate: Schema.Attribute.DateTime;
+    fiscalReceiptSent: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
+    isRecurring: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::donation-transaction.donation-transaction'
+    > &
+      Schema.Attribute.Private;
+    message: Schema.Attribute.Text;
+    metadata: Schema.Attribute.JSON;
+    paymentIntentId: Schema.Attribute.String;
+    paymentMethod: Schema.Attribute.Enumeration<
+      ['stripe', 'paypal', 'card', 'bank_transfer', 'other']
+    > &
+      Schema.Attribute.DefaultTo<'stripe'>;
+    project: Schema.Attribute.Relation<'manyToOne', 'api::project.project'>;
+    publishedAt: Schema.Attribute.DateTime;
+    recurringInterval: Schema.Attribute.Enumeration<
+      ['monthly', 'quarterly', 'yearly']
+    > &
+      Schema.Attribute.DefaultTo<'monthly'>;
+    reference: Schema.Attribute.String & Schema.Attribute.Unique;
+    status: Schema.Attribute.Enumeration<
+      ['pending', 'completed', 'failed', 'refunded', 'cancelled']
+    > &
+      Schema.Attribute.DefaultTo<'pending'>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -604,11 +724,58 @@ export interface ApiDonationDonation extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiFinancialReportFinancialReport
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'financial_reports';
+  info: {
+    displayName: 'Rapport Financier';
+    pluralName: 'financial-reports';
+    singularName: 'financial-report';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    activeProjects: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    breakdown: Schema.Attribute.JSON;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    endDate: Schema.Attribute.Date & Schema.Attribute.Required;
+    fieldExpenses: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::financial-report.financial-report'
+    > &
+      Schema.Attribute.Private;
+    newDonors: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    notes: Schema.Attribute.Text;
+    operationalCosts: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+    period: Schema.Attribute.Enumeration<
+      ['daily', 'weekly', 'monthly', 'quarterly', 'annual']
+    > &
+      Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    recurringDonors: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    reportFile: Schema.Attribute.Media<'files'>;
+    startDate: Schema.Attribute.Date & Schema.Attribute.Required;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+    totalBeneficiaries: Schema.Attribute.Integer &
+      Schema.Attribute.DefaultTo<0>;
+    totalDonations: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+    totalDonors: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    totalProjects: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiGlobalGlobal extends Struct.SingleTypeSchema {
   collectionName: 'globals';
   info: {
-    description: 'Define global settings';
-    displayName: 'Global';
+    displayName: 'Configuration globale';
     pluralName: 'globals';
     singularName: 'global';
   };
@@ -620,19 +787,39 @@ export interface ApiGlobalGlobal extends Struct.SingleTypeSchema {
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     defaultSeo: Schema.Attribute.Component<'shared.seo', false>;
-    favicon: Schema.Attribute.Media<'images' | 'files' | 'videos'>;
+    donationEnabled: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<true>;
+    favicon: Schema.Attribute.Media<'images'>;
+    googleAnalyticsId: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::global.global'
     > &
       Schema.Attribute.Private;
+    maintenanceMode: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
     publishedAt: Schema.Attribute.DateTime;
-    siteDescription: Schema.Attribute.Text & Schema.Attribute.Required;
-    siteName: Schema.Attribute.String & Schema.Attribute.Required;
+    siteAddress: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'Georgia, United States'>;
+    siteDescription: Schema.Attribute.Text;
+    siteEmail: Schema.Attribute.Email &
+      Schema.Attribute.DefaultTo<'helpfunds17@gmail.com'>;
+    siteName: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'Help Funds'>;
+    sitePhone: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'+1 (470) 661-6320'>;
+    socialFacebook: Schema.Attribute.String;
+    socialInstagram: Schema.Attribute.String;
+    socialTiktok: Schema.Attribute.String;
+    socialTwitter: Schema.Attribute.String;
+    socialYoutube: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    urgencyBannerActive: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
+    urgencyBannerText: Schema.Attribute.String;
   };
 }
 
@@ -668,6 +855,46 @@ export interface ApiImpactStatImpactStat extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiNewsletterSubscriberNewsletterSubscriber
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'newsletter_subscribers';
+  info: {
+    displayName: 'Abonne Newsletter';
+    pluralName: 'newsletter-subscribers';
+    singularName: 'newsletter-subscriber';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    active: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    email: Schema.Attribute.Email &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
+    firstName: Schema.Attribute.String;
+    lastName: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::newsletter-subscriber.newsletter-subscriber'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    source: Schema.Attribute.Enumeration<
+      ['footer', 'popup', 'don', 'contact', 'autre']
+    > &
+      Schema.Attribute.DefaultTo<'footer'>;
+    subscribedAt: Schema.Attribute.DateTime;
+    unsubscribedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiPartnerPartner extends Struct.CollectionTypeSchema {
   collectionName: 'partners';
   info: {
@@ -698,7 +925,8 @@ export interface ApiPartnerPartner extends Struct.CollectionTypeSchema {
 export interface ApiProjectProject extends Struct.CollectionTypeSchema {
   collectionName: 'projects';
   info: {
-    displayName: 'Project';
+    description: 'Projets humanitaires de Help Funds';
+    displayName: 'Projet';
     pluralName: 'projects';
     singularName: 'project';
   };
@@ -706,33 +934,56 @@ export interface ApiProjectProject extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
-    beneficiaries: Schema.Attribute.Integer;
-    category: Schema.Attribute.Enumeration<['morning ']>;
-    collectedAmount: Schema.Attribute.Integer;
+    beneficiaries: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    beneficiariesTarget: Schema.Attribute.Integer &
+      Schema.Attribute.DefaultTo<0>;
+    budgetBreakdown: Schema.Attribute.JSON;
+    campaigns: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::donation-campaign.donation-campaign'
+    >;
+    category: Schema.Attribute.String;
     country: Schema.Attribute.String;
+    coverImage: Schema.Attribute.Media<'images'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    description: Schema.Attribute.Blocks;
-    featured: Schema.Attribute.Boolean;
-    image: Schema.Attribute.Media<
-      'images' | 'files' | 'videos' | 'audios',
-      true
-    >;
+    description: Schema.Attribute.RichText;
+    documents: Schema.Attribute.Media<'files', true>;
+    endDate: Schema.Attribute.Date;
+    featured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    gallery: Schema.Attribute.Media<'images' | 'videos', true>;
+    goalAmount: Schema.Attribute.Decimal & Schema.Attribute.Required;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::project.project'
     > &
       Schema.Attribute.Private;
-    published: Schema.Attribute.Boolean;
+    milestones: Schema.Attribute.JSON;
+    objectives: Schema.Attribute.JSON;
     publishedAt: Schema.Attribute.DateTime;
-    slug: Schema.Attribute.UID;
-    targetAmount: Schema.Attribute.Integer;
-    title: Schema.Attribute.String;
+    raisedAmount: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+    region: Schema.Attribute.String;
+    remaining: Schema.Attribute.JSON;
+    results: Schema.Attribute.JSON;
+    seo: Schema.Attribute.Component<'shared.seo', false>;
+    shortDescription: Schema.Attribute.Text & Schema.Attribute.Required;
+    slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
+    startDate: Schema.Attribute.Date;
+    status: Schema.Attribute.Enumeration<
+      ['nouveau', 'en-cours', 'urgent', 'termine']
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'nouveau'>;
+    team: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    testimonials: Schema.Attribute.JSON;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    updates: Schema.Attribute.JSON;
+    villages: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
   };
 }
 
@@ -1326,9 +1577,13 @@ declare module '@strapi/strapi' {
       'api::article.article': ApiArticleArticle;
       'api::author.author': ApiAuthorAuthor;
       'api::category.category': ApiCategoryCategory;
+      'api::donation-campaign.donation-campaign': ApiDonationCampaignDonationCampaign;
+      'api::donation-transaction.donation-transaction': ApiDonationTransactionDonationTransaction;
       'api::donation.donation': ApiDonationDonation;
+      'api::financial-report.financial-report': ApiFinancialReportFinancialReport;
       'api::global.global': ApiGlobalGlobal;
       'api::impact-stat.impact-stat': ApiImpactStatImpactStat;
+      'api::newsletter-subscriber.newsletter-subscriber': ApiNewsletterSubscriberNewsletterSubscriber;
       'api::partner.partner': ApiPartnerPartner;
       'api::project.project': ApiProjectProject;
       'api::slider.slider': ApiSliderSlider;

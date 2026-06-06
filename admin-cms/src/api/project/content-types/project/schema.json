@@ -4,55 +4,53 @@
   "info": {
     "singularName": "project",
     "pluralName": "projects",
-    "displayName": "Project"
+    "displayName": "Projet",
+    "description": "Projets humanitaires de Help Funds"
   },
-  "options": {
-    "draftAndPublish": true
-  },
-  "pluginOptions": {},
+  "options": { "draftAndPublish": true },
   "attributes": {
-    "title": {
-      "type": "string"
-    },
-    "slug": {
-      "type": "uid"
-    },
-    "description": {
-      "type": "blocks"
-    },
-    "image": {
-      "type": "media",
-      "multiple": true,
-      "allowedTypes": [
-        "images",
-        "files",
-        "videos",
-        "audios"
-      ]
-    },
-    "category": {
+    "title": { "type": "string", "required": true },
+    "slug": { "type": "uid", "targetField": "title", "required": true },
+    "shortDescription": { "type": "text", "required": true },
+    "description": { "type": "richtext" },
+    "coverImage": { "type": "media", "multiple": false, "allowedTypes": ["images"] },
+    "gallery": { "type": "media", "multiple": true, "allowedTypes": ["images", "videos"] },
+    "documents": { "type": "media", "multiple": true, "allowedTypes": ["files"] },
+    "category": { "type": "string" },
+    "country": { "type": "string" },
+    "region": { "type": "string" },
+    "status": {
       "type": "enumeration",
-      "enum": [
-        "morning "
-      ]
+      "enum": ["nouveau", "en-cours", "urgent", "termine"],
+      "default": "nouveau",
+      "required": true
     },
-    "country": {
-      "type": "string"
+    "featured": { "type": "boolean", "default": false },
+    "goalAmount": { "type": "decimal", "required": true },
+    "raisedAmount": { "type": "decimal", "default": 0 },
+    "beneficiaries": { "type": "integer", "default": 0 },
+    "beneficiariesTarget": { "type": "integer", "default": 0 },
+    "startDate": { "type": "date" },
+    "endDate": { "type": "date" },
+    "team": { "type": "integer", "default": 0 },
+    "villages": { "type": "integer", "default": 0 },
+    "objectives": { "type": "json" },
+    "results": { "type": "json" },
+    "remaining": { "type": "json" },
+    "milestones": { "type": "json" },
+    "updates": { "type": "json" },
+    "budgetBreakdown": { "type": "json" },
+    "testimonials": { "type": "json" },
+    "campaigns": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::donation-campaign.donation-campaign",
+      "mappedBy": "project"
     },
-    "beneficiaries": {
-      "type": "integer"
-    },
-    "targetAmount": {
-      "type": "integer"
-    },
-    "collectedAmount": {
-      "type": "integer"
-    },
-    "featured": {
-      "type": "boolean"
-    },
-    "published": {
-      "type": "boolean"
+    "seo": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.seo"
     }
   }
 }

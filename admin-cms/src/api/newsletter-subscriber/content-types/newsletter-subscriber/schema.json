@@ -1,0 +1,23 @@
+{
+  "kind": "collectionType",
+  "collectionName": "newsletter_subscribers",
+  "info": {
+    "singularName": "newsletter-subscriber",
+    "pluralName": "newsletter-subscribers",
+    "displayName": "Abonne Newsletter"
+  },
+  "options": { "draftAndPublish": false },
+  "attributes": {
+    "email": { "type": "email", "required": true, "unique": true },
+    "firstName": { "type": "string" },
+    "lastName": { "type": "string" },
+    "active": { "type": "boolean", "default": true },
+    "subscribedAt": { "type": "datetime" },
+    "unsubscribedAt": { "type": "datetime" },
+    "source": {
+      "type": "enumeration",
+      "enum": ["footer", "popup", "don", "contact", "autre"],
+      "default": "footer"
+    }
+  }
+}

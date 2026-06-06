@@ -1,0 +1,51 @@
+{
+  "kind": "collectionType",
+  "collectionName": "donation_transactions",
+  "info": {
+    "singularName": "donation-transaction",
+    "pluralName": "donation-transactions",
+    "displayName": "Transaction Don"
+  },
+  "options": { "draftAndPublish": false },
+  "attributes": {
+    "reference": { "type": "string", "unique": true },
+    "amount": { "type": "decimal", "required": true },
+    "currency": { "type": "string", "default": "EUR" },
+    "status": {
+      "type": "enumeration",
+      "enum": ["pending", "completed", "failed", "refunded", "cancelled"],
+      "default": "pending"
+    },
+    "paymentMethod": {
+      "type": "enumeration",
+      "enum": ["stripe", "paypal", "card", "bank_transfer", "other"],
+      "default": "stripe"
+    },
+    "paymentIntentId": { "type": "string" },
+    "donorFirstName": { "type": "string" },
+    "donorLastName": { "type": "string" },
+    "donorEmail": { "type": "email" },
+    "donorPhone": { "type": "string" },
+    "anonymous": { "type": "boolean", "default": false },
+    "message": { "type": "text" },
+    "isRecurring": { "type": "boolean", "default": false },
+    "recurringInterval": {
+      "type": "enumeration",
+      "enum": ["monthly", "quarterly", "yearly"],
+      "default": "monthly"
+    },
+    "campaign": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::donation-campaign.donation-campaign"
+    },
+    "project": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::project.project"
+    },
+    "fiscalReceiptSent": { "type": "boolean", "default": false },
+    "fiscalReceiptDate": { "type": "datetime" },
+    "metadata": { "type": "json" }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "kind": "collectionType",
+  "collectionName": "financial_reports",
+  "info": {
+    "singularName": "financial-report",
+    "pluralName": "financial-reports",
+    "displayName": "Rapport Financier"
+  },
+  "options": { "draftAndPublish": false },
+  "attributes": {
+    "title": { "type": "string", "required": true },
+    "period": {
+      "type": "enumeration",
+      "enum": ["daily", "weekly", "monthly", "quarterly", "annual"],
+      "required": true
+    },
+    "startDate": { "type": "date", "required": true },
+    "endDate": { "type": "date", "required": true },
+    "totalDonations": { "type": "decimal", "default": 0 },
+    "totalDonors": { "type": "integer", "default": 0 },
+    "newDonors": { "type": "integer", "default": 0 },
+    "recurringDonors": { "type": "integer", "default": 0 },
+    "totalProjects": { "type": "integer", "default": 0 },
+    "activeProjects": { "type": "integer", "default": 0 },
+    "totalBeneficiaries": { "type": "integer", "default": 0 },
+    "operationalCosts": { "type": "decimal", "default": 0 },
+    "fieldExpenses": { "type": "decimal", "default": 0 },
+    "notes": { "type": "text" },
+    "reportFile": { "type": "media", "multiple": false, "allowedTypes": ["files"] },
+    "breakdown": { "type": "json" }
+  }
+}

@@ -150,11 +150,20 @@ export default function Navbar() {
               </div>
             ))}
             <div className="pt-4 pb-2 flex flex-col gap-3 border-t border-neutral-100 mt-4">
-              <Link href="/contact" onClick={() => setIsOpen(false)} className="block text-center px-4 py-3 border border-neutral-200 rounded-xl text-sm font-medium text-neutral-700 hover:border-primary-300 transition-colors">
+              <Link
+                href="/contact"
+                onClick={() => setIsOpen(false)}
+                className="block text-center px-4 py-3 border border-neutral-200 rounded-xl text-sm font-medium text-neutral-700 hover:border-primary-300 transition-colors"
+              >
                 Contact
               </Link>
-              <Link href="/don" onClick={() => setIsOpen(false)} className="flex items-center justify-center gap-2 bg-secondary-600 hover:bg-secondary-700 text-white font-bold px-4 py-3 rounded-xl text-sm transition-all">
-                <Heart className="w-4 h-4 fill-white" />Faire un don
+              <Link
+                href="/don"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center justify-center gap-2 bg-secondary-600 hover:bg-secondary-700 text-white font-bold px-4 py-3 rounded-xl text-sm transition-all"
+              >
+                <Heart className="w-4 h-4 fill-white" />
+                Faire un don
               </Link>
             </div>
           </div>
