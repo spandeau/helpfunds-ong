@@ -8,7 +8,7 @@ import Autoplay from "embla-carousel-autoplay";
 import {
   Heart, User, Mail, MessageSquare, CreditCard,
   Repeat, Gift, Check, ChevronLeft, ChevronRight,
-  Shield, ArrowRight, Smartphone, X
+  Shield, ArrowRight, Smartphone, X, Lock
 } from "lucide-react";
 
 const AMOUNTS = [10, 25, 50, 100, 250, 500];
@@ -26,16 +26,109 @@ const IMPACT_SLIDES = [
   { id: 2, title: "Acces aux soins", description: "Consultations medicales gratuites pour les communautes isolees.", image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80", stat: "1 200 patients / mois", badge: "Sante", color: "from-blue-950/90 via-blue-900/70 to-transparent" },
   { id: 3, title: "Education des enfants", description: "Fournitures scolaires pour les enfants defavorises.", image: "https://images.unsplash.com/photo-1497486751825-1233686d5d80?w=800&q=80", stat: "3 500 enfants", badge: "Education", color: "from-green-950/90 via-green-900/70 to-transparent" },
   { id: 4, title: "Projets communautaires", description: "Construction de puits et projets agricoles durables.", image: "https://images.unsplash.com/photo-1541544537156-7627a7a4aa1c?w=800&q=80", stat: "45 villages", badge: "Communaute", color: "from-purple-950/90 via-purple-900/70 to-transparent" },
-  { id: 5, title: "Aide aux familles", description: "Soutien psychologique pour les familles en detresse.", image: "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?w=800&q=80", stat: "800 familles", badge: "Famille", color: "from-red-950/90 via-red-900/70 to-transparent" },
+  { id: 5, title: "Aide aux familles", description: "Soutien psychologique et materiel pour les familles en detresse.", image: "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?w=800&q=80", stat: "800 familles", badge: "Famille", color: "from-red-950/90 via-red-900/70 to-transparent" },
 ];
+
+const MOBILE_OPERATORS = [
+  {
+    value: "mtn",
+    label: "MTN",
+    color: "bg-yellow-400",
+    textColor: "text-yellow-900",
+    border: "border-yellow-400",
+    logo: (
+      <svg viewBox="0 0 60 20" className="w-12 h-5">
+        <rect width="60" height="20" rx="2" fill="#FFCC00"/>
+        <text x="5" y="15" fontFamily="Arial Black" fontWeight="900" fontSize="13" fill="#000">MTN</text>
+      </svg>
+    ),
+  },
+  {
+    value: "orange",
+    label: "Orange",
+    color: "bg-orange-500",
+    textColor: "text-white",
+    border: "border-orange-500",
+    logo: (
+      <svg viewBox="0 0 70 20" className="w-14 h-5">
+        <rect width="70" height="20" rx="2" fill="#FF6600"/>
+        <text x="5" y="15" fontFamily="Arial" fontWeight="700" fontSize="12" fill="#fff">Orange</text>
+      </svg>
+    ),
+  },
+  {
+    value: "moov",
+    label: "Moov",
+    color: "bg-blue-600",
+    textColor: "text-white",
+    border: "border-blue-600",
+    logo: (
+      <svg viewBox="0 0 60 20" className="w-12 h-5">
+        <rect width="60" height="20" rx="2" fill="#0033A0"/>
+        <text x="5" y="15" fontFamily="Arial" fontWeight="700" fontSize="12" fill="#fff">Moov</text>
+      </svg>
+    ),
+  },
+  {
+    value: "wave",
+    label: "Wave",
+    color: "bg-sky-400",
+    textColor: "text-white",
+    border: "border-sky-400",
+    logo: (
+      <svg viewBox="0 0 60 20" className="w-12 h-5">
+        <rect width="60" height="20" rx="2" fill="#1ABCFE"/>
+        <text x="5" y="15" fontFamily="Arial" fontWeight="700" fontSize="12" fill="#fff">Wave</text>
+      </svg>
+    ),
+  },
+];
+
+function VisaLogo() {
+  return (
+    <svg viewBox="0 0 60 20" className="w-10 h-6">
+      <text x="2" y="16" fontFamily="Arial" fontWeight="900" fontSize="16" fontStyle="italic" fill="#1A1F71">VISA</text>
+    </svg>
+  );
+}
+
+function MastercardLogo() {
+  return (
+    <svg viewBox="0 0 38 24" className="w-9 h-6">
+      <circle cx="14" cy="12" r="10" fill="#EB001B"/>
+      <circle cx="24" cy="12" r="10" fill="#F79E1B" opacity="0.9"/>
+      <path d="M19 5.5a10 10 0 0 1 0 13A10 10 0 0 1 19 5.5z" fill="#FF5F00"/>
+    </svg>
+  );
+}
+
+function AmexLogo() {
+  return (
+    <svg viewBox="0 0 50 20" className="w-10 h-6">
+      <rect width="50" height="20" rx="2" fill="#2E77BC"/>
+      <text x="4" y="14" fontFamily="Arial" fontWeight="900" fontSize="9" fill="#fff" letterSpacing="1">AMEX</text>
+    </svg>
+  );
+}
 
 function ImpactSlider() {
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, duration: 40, align: "start" }, [Autoplay({ delay: 4000, stopOnInteraction: false })]);
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    { loop: true, duration: 40, align: "start" },
+    [Autoplay({ delay: 4000, stopOnInteraction: false })]
+  );
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
-  const onSelect = useCallback(() => { if (!emblaApi) return; setSelectedIndex(emblaApi.selectedScrollSnap()); }, [emblaApi]);
-  useEffect(() => { if (!emblaApi) return; onSelect(); emblaApi.on("select", onSelect); return () => { emblaApi.off("select", onSelect); }; }, [emblaApi, onSelect]);
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setSelectedIndex(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
+  useEffect(() => {
+    if (!emblaApi) return;
+    onSelect();
+    emblaApi.on("select", onSelect);
+    return () => { emblaApi.off("select", onSelect); };
+  }, [emblaApi, onSelect]);
 
   return (
     <div className="mt-8">
@@ -45,8 +138,12 @@ function ImpactSlider() {
           <p className="text-neutral-400 text-xs mt-0.5">Cliquez pour decouvrir chaque action</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={scrollPrev} className="w-8 h-8 bg-neutral-100 hover:bg-primary-600 hover:text-white rounded-full flex items-center justify-center text-neutral-600 transition-all"><ChevronLeft className="w-4 h-4" /></button>
-          <button onClick={scrollNext} className="w-8 h-8 bg-neutral-100 hover:bg-primary-600 hover:text-white rounded-full flex items-center justify-center text-neutral-600 transition-all"><ChevronRight className="w-4 h-4" /></button>
+          <button onClick={scrollPrev} className="w-8 h-8 bg-neutral-100 hover:bg-primary-600 hover:text-white rounded-full flex items-center justify-center text-neutral-600 transition-all">
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <button onClick={scrollNext} className="w-8 h-8 bg-neutral-100 hover:bg-primary-600 hover:text-white rounded-full flex items-center justify-center text-neutral-600 transition-all">
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
       </div>
       <div ref={emblaRef} className="overflow-hidden">
@@ -83,51 +180,13 @@ function ImpactSlider() {
   );
 }
 
-function PaymentLogos() {
-  return (
-    <div className="my-5 p-4 bg-neutral-50 rounded-xl border border-neutral-100">
-      <div className="flex items-center gap-2 mb-3">
-        <Shield className="w-4 h-4 text-secondary-600" />
-        <p className="text-xs font-semibold text-neutral-600 uppercase tracking-wide">Moyens de paiement acceptes</p>
-      </div>
-      <div className="flex flex-wrap gap-2 items-center">
-        <div className="h-8 px-4 bg-white border border-neutral-200 rounded-lg flex items-center shadow-sm">
-          <span className="text-[#1A1F71] font-black text-sm tracking-tight italic">VISA</span>
-        </div>
-        <div className="h-8 w-12 bg-white border border-neutral-200 rounded-lg flex items-center justify-center shadow-sm">
-          <div className="flex"><div className="w-4 h-4 rounded-full bg-[#EB001B]" /><div className="w-4 h-4 rounded-full bg-[#F79E1B] -ml-2 opacity-90" /></div>
-        </div>
-        <div className="h-8 px-3 bg-black rounded-lg flex items-center gap-1 shadow-sm">
-          <svg className="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-          <span className="text-white font-semibold text-xs">Pay</span>
-        </div>
-        <div className="h-8 px-3 bg-white border border-neutral-200 rounded-lg flex items-center gap-0.5 shadow-sm">
-          <span className="font-bold text-xs" style={{color:"#4285F4"}}>G</span>
-          <span className="text-neutral-700 font-semibold text-xs ml-0.5">Pay</span>
-        </div>
-        <div className="h-8 px-3 bg-[#2E77BC] rounded-lg flex items-center shadow-sm">
-          <span className="text-white font-black text-xs tracking-widest">AMEX</span>
-        </div>
-        <div className="h-8 px-3 bg-[#635BFF] rounded-lg flex items-center shadow-sm">
-          <span className="text-white font-bold text-xs">stripe</span>
-        </div>
-        <div className="h-8 px-3 bg-orange-500 rounded-lg flex items-center gap-1 shadow-sm">
-          <Smartphone className="w-3 h-3 text-white" />
-          <span className="text-white font-bold text-xs">Mobile Money</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-type Step = 1 | 2 | 3 | 4;
+type Step = 1 | 2 | 3;
 type DonationType = "unique" | "mensuel";
 type PaymentMethod = "mobile_money" | "card" | null;
 
 export default function DonationForm() {
   const [step, setStep] = useState<Step>(1);
   const [donationType, setDonationType] = useState<DonationType>("unique");
-  const [selectedAmount, setSelectedAmount] = useState<number>(50);
   const [customAmount, setCustomAmount] = useState<string>("50");
   const [selectedProject, setSelectedProject] = useState("general");
   const [anonymous, setAnonymous] = useState(false);
@@ -135,18 +194,13 @@ export default function DonationForm() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [formData, setFormData] = useState({ firstName: "", lastName: "", email: "", message: "" });
   const [mobileData, setMobileData] = useState({ phone: "", operator: "mtn" });
+  const [cardData, setCardData] = useState({ number: "", expiry: "", cvv: "", name: "" });
   const [submitted, setSubmitted] = useState(false);
 
   const finalAmount = Number(customAmount) || 0;
 
   const handleAmountClick = (amount: number) => {
-    setSelectedAmount(amount);
     setCustomAmount(String(amount));
-  };
-
-  const handleCustomAmountChange = (value: string) => {
-    setCustomAmount(value);
-    setSelectedAmount(0);
   };
 
   const handleStep2Continue = () => {
@@ -167,7 +221,7 @@ export default function DonationForm() {
     return (
       <section className="py-20 bg-white">
         <div className="max-w-2xl mx-auto px-4 text-center">
-          <div className="w-24 h-24 bg-secondary-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <div className="w-24 h-24 bg-secondary-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
             <Check className="w-12 h-12 text-secondary-600" />
           </div>
           <h2 className="font-heading font-bold text-neutral-900 text-3xl mb-4">Merci {formData.firstName} !</h2>
@@ -176,7 +230,15 @@ export default function DonationForm() {
             {donationType === "mensuel" ? " par mois" : ""} a bien ete enregistre.
           </p>
           <p className="text-neutral-400 text-sm mb-8">Un recu fiscal sera envoye a {formData.email}</p>
-          <a href="/" className="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-bold px-8 py-4 rounded-2xl transition-all">Retour a l accueil</a>
+          <div className="bg-primary-50 border border-primary-100 rounded-2xl p-6 mb-8 text-left">
+            <h3 className="font-semibold text-primary-900 mb-2">Ce que votre don permet :</h3>
+            <ul className="space-y-2 text-sm text-primary-700">
+              {finalAmount >= 10 && <li className="flex items-center gap-2"><Check className="w-4 h-4 text-secondary-600" />Fournitures scolaires pour {Math.floor(finalAmount / 5)} enfants</li>}
+              {finalAmount >= 25 && <li className="flex items-center gap-2"><Check className="w-4 h-4 text-secondary-600" />Kit medical de premiers secours</li>}
+              {finalAmount >= 50 && <li className="flex items-center gap-2"><Check className="w-4 h-4 text-secondary-600" />Eau potable pour {Math.floor(finalAmount / 10)} personnes</li>}
+            </ul>
+          </div>
+          <Link href="/" className="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-bold px-8 py-4 rounded-2xl transition-all">Retour a l accueil</Link>
         </div>
       </section>
     );
@@ -185,53 +247,85 @@ export default function DonationForm() {
   return (
     <div>
       {showPaymentModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="font-heading font-bold text-neutral-900 text-xl">
-                Comment souhaitez-vous effectuer votre don ?
-              </h3>
-              <button onClick={() => setShowPaymentModal(false)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-neutral-100 transition-colors">
-                <X className="w-5 h-5 text-neutral-500" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: "rgba(0,0,0,0.7)" }}>
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl" style={{ animation: "slideUp 0.3s ease-out" }}>
+            <style>{`@keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }`}</style>
+
+            <div className="flex items-center justify-between mb-2">
+              <div className="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center">
+                <Heart className="w-5 h-5 text-primary-600 fill-primary-600" />
+              </div>
+              <button onClick={() => setShowPaymentModal(false)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-neutral-100 transition-colors text-neutral-400">
+                <X className="w-5 h-5" />
               </button>
             </div>
+
+            <h3 className="font-heading font-bold text-neutral-900 text-xl mb-1 mt-3">
+              Comment souhaitez-vous payer ?
+            </h3>
             <p className="text-neutral-500 text-sm mb-6">
-              Montant : <span className="font-bold text-primary-600">{finalAmount}€</span>
-              {donationType === "mensuel" ? "/mois" : ""}
+              Don de <span className="font-bold text-primary-600 text-base">{finalAmount}€</span>
+              {donationType === "mensuel" ? <span className="text-neutral-400">/mois</span> : ""}
+              {!anonymous && formData.firstName && <span className="text-neutral-400"> · {formData.firstName} {formData.lastName}</span>}
             </p>
-            <div className="flex flex-col gap-4">
+
+            <div className="space-y-3 mb-6">
               <button
                 onClick={() => handlePaymentChoice("mobile_money")}
-                className="flex items-center gap-4 p-5 rounded-2xl border-2 border-neutral-200 hover:border-orange-400 hover:bg-orange-50 transition-all group"
+                className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-neutral-100 hover:border-orange-400 hover:bg-orange-50 transition-all group"
               >
-                <div className="w-14 h-14 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Smartphone className="w-7 h-7 text-orange-600" />
+                <div className="w-14 h-14 bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md group-hover:scale-105 transition-transform">
+                  <Smartphone className="w-7 h-7 text-white" />
                 </div>
-                <div className="text-left">
-                  <p className="font-bold text-neutral-900 text-base">Mobile Money</p>
-                  <p className="text-neutral-500 text-sm">MTN, Orange, Moov, Wave...</p>
+                <div className="text-left flex-1">
+                  <p className="font-bold text-neutral-900">Mobile Money</p>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    {MOBILE_OPERATORS.map((op) => (
+                      <div key={op.value} className={`${op.color} rounded px-1.5 py-0.5`}>
+                        <span className={`text-[9px] font-black ${op.textColor}`}>{op.label}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <ArrowRight className="w-5 h-5 text-neutral-300 group-hover:text-orange-500 ml-auto transition-colors" />
+                <ArrowRight className="w-5 h-5 text-neutral-300 group-hover:text-orange-500 transition-colors flex-shrink-0" />
               </button>
 
               <button
                 onClick={() => handlePaymentChoice("card")}
-                className="flex items-center gap-4 p-5 rounded-2xl border-2 border-neutral-200 hover:border-primary-400 hover:bg-primary-50 transition-all group"
+                className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-neutral-100 hover:border-primary-400 hover:bg-primary-50 transition-all group"
               >
-                <div className="w-14 h-14 bg-primary-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <CreditCard className="w-7 h-7 text-primary-600" />
+                <div className="w-14 h-14 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md group-hover:scale-105 transition-transform">
+                  <CreditCard className="w-7 h-7 text-white" />
                 </div>
-                <div className="text-left">
-                  <p className="font-bold text-neutral-900 text-base">Carte bancaire</p>
-                  <p className="text-neutral-500 text-sm">Visa, Mastercard, AMEX...</p>
+                <div className="text-left flex-1">
+                  <p className="font-bold text-neutral-900">Carte bancaire</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="bg-white border border-neutral-100 rounded px-1.5 py-0.5 shadow-sm">
+                      <VisaLogo />
+                    </div>
+                    <div className="bg-white border border-neutral-100 rounded px-1.5 py-0.5 shadow-sm">
+                      <MastercardLogo />
+                    </div>
+                    <div className="bg-white border border-neutral-100 rounded px-1.5 py-0.5 shadow-sm">
+                      <AmexLogo />
+                    </div>
+                  </div>
                 </div>
-                <ArrowRight className="w-5 h-5 text-neutral-300 group-hover:text-primary-500 ml-auto transition-colors" />
+                <ArrowRight className="w-5 h-5 text-neutral-300 group-hover:text-primary-500 transition-colors flex-shrink-0" />
               </button>
             </div>
-            <p className="text-xs text-neutral-400 text-center mt-5 flex items-center justify-center gap-1">
-              <Shield className="w-3 h-3" />
-              Paiement 100% securise — SSL 256-bit
-            </p>
+
+            <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 mb-5">
+              <p className="text-amber-800 text-xs leading-relaxed text-center italic">
+                "Votre contribution aide directement a soutenir nos actions humanitaires et a ameliorer la vie des beneficiaires."
+              </p>
+            </div>
+
+            <div className="flex items-center justify-center gap-4 text-xs text-neutral-400">
+              <span className="flex items-center gap-1"><Lock className="w-3 h-3 text-secondary-500" />Paiement 100% securise</span>
+              <span>·</span>
+              <span className="flex items-center gap-1"><Shield className="w-3 h-3 text-secondary-500" />Donnees protegees</span>
+            </div>
           </div>
         </div>
       )}
@@ -246,12 +340,12 @@ export default function DonationForm() {
             ].map((s, index) => (
               <div key={s.num} className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
-                  <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm transition-all ${step >= s.num ? "bg-primary-600 text-white" : "bg-neutral-100 text-neutral-400"}`}>
+                  <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm transition-all ${step >= s.num ? "bg-primary-600 text-white shadow-lg" : "bg-neutral-100 text-neutral-400"}`}>
                     {step > s.num ? <Check className="w-4 h-4" /> : s.num}
                   </div>
                   <span className={`text-sm font-medium hidden sm:block ${step >= s.num ? "text-primary-600" : "text-neutral-400"}`}>{s.label}</span>
                 </div>
-                {index < 2 && <div className={`w-16 h-px ${step > s.num ? "bg-primary-600" : "bg-neutral-200"}`} />}
+                {index < 2 && <div className={`w-16 h-0.5 ${step > s.num ? "bg-primary-600" : "bg-neutral-200"}`} />}
               </div>
             ))}
           </div>
@@ -262,7 +356,6 @@ export default function DonationForm() {
               {step === 1 && (
                 <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-6 md:p-8">
                   <h2 className="font-heading font-bold text-neutral-900 text-2xl mb-6">Choisissez votre don</h2>
-
                   <div className="flex gap-3 mb-6">
                     <button onClick={() => setDonationType("unique")} className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 font-semibold text-sm transition-all ${donationType === "unique" ? "border-primary-600 bg-primary-50 text-primary-700" : "border-neutral-200 text-neutral-500"}`}>
                       <Gift className="w-4 h-4" />Don unique
@@ -271,39 +364,27 @@ export default function DonationForm() {
                       <Repeat className="w-4 h-4" />Don mensuel
                     </button>
                   </div>
-
                   <p className="text-sm font-semibold text-neutral-500 mb-3 uppercase tracking-wide">Montants suggeres</p>
-                  <div className="grid grid-cols-3 gap-3 mb-4">
+                  <div className="grid grid-cols-3 gap-3 mb-5">
                     {AMOUNTS.map((amount) => (
-                      <button
-                        key={amount}
-                        onClick={() => handleAmountClick(amount)}
-                        className={`py-4 rounded-xl border-2 font-bold text-lg transition-all ${Number(customAmount) === amount ? "border-primary-600 bg-primary-600 text-white shadow-lg" : "border-neutral-200 text-neutral-700 hover:border-primary-300"}`}
-                      >
+                      <button key={amount} onClick={() => handleAmountClick(amount)}
+                        className={`py-4 rounded-xl border-2 font-bold text-lg transition-all ${Number(customAmount) === amount ? "border-primary-600 bg-primary-600 text-white shadow-lg scale-105" : "border-neutral-200 text-neutral-700 hover:border-primary-300 hover:bg-primary-50"}`}>
                         {amount}€
                       </button>
                     ))}
                   </div>
-
-                  <p className="text-sm font-semibold text-neutral-500 mb-2 uppercase tracking-wide">Autre montant</p>
-                  <div className="relative mb-4">
-                    <input
-                      type="number"
-                      placeholder="Saisissez un montant"
-                      value={customAmount}
-                      onChange={(e) => handleCustomAmountChange(e.target.value)}
-                      className="w-full px-4 py-3 pr-12 rounded-xl border-2 border-neutral-200 focus:outline-none focus:border-primary-500 text-lg font-semibold"
-                      min="1"
-                    />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 font-bold">€</span>
+                  <p className="text-sm font-semibold text-neutral-500 mb-2 uppercase tracking-wide">Montant personnalise</p>
+                  <div className="relative mb-6">
+                    <input type="number" placeholder="Saisissez un montant" value={customAmount}
+                      onChange={(e) => setCustomAmount(e.target.value)}
+                      className="w-full px-4 py-3 pr-12 rounded-xl border-2 border-neutral-200 focus:outline-none focus:border-primary-500 text-lg font-semibold" min="1" />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 font-bold text-lg">€</span>
                   </div>
-
-                  <PaymentLogos />
-
                   <p className="text-sm font-semibold text-neutral-500 mb-3 uppercase tracking-wide">Affecter a un projet</p>
-                  <div className="flex flex-col gap-2 mb-4">
+                  <div className="flex flex-col gap-2 mb-6">
                     {PROJECTS.map((project) => (
-                      <button key={project.value} onClick={() => setSelectedProject(project.value)} className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${selectedProject === project.value ? "border-primary-600 bg-primary-50" : "border-neutral-200 hover:border-neutral-300"}`}>
+                      <button key={project.value} onClick={() => setSelectedProject(project.value)}
+                        className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${selectedProject === project.value ? "border-primary-600 bg-primary-50" : "border-neutral-200 hover:border-neutral-300"}`}>
                         <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${selectedProject === project.value ? "border-primary-600 bg-primary-600" : "border-neutral-300"}`}>
                           {selectedProject === project.value && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
                         </div>
@@ -311,15 +392,10 @@ export default function DonationForm() {
                       </button>
                     ))}
                   </div>
-
-                  <button
-                    onClick={() => finalAmount > 0 && setStep(2)}
-                    disabled={finalAmount <= 0}
-                    className="w-full bg-primary-600 hover:bg-primary-700 disabled:bg-neutral-200 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl text-lg transition-all hover:shadow-lg mb-2"
-                  >
+                  <button onClick={() => finalAmount > 0 && setStep(2)} disabled={finalAmount <= 0}
+                    className="w-full bg-primary-600 hover:bg-primary-700 disabled:bg-neutral-200 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl text-lg transition-all hover:shadow-lg mb-2">
                     Continuer avec {finalAmount > 0 ? finalAmount + "€" : "..."}{donationType === "mensuel" ? "/mois" : ""}
                   </button>
-
                   <ImpactSlider />
                 </div>
               )}
@@ -330,14 +406,14 @@ export default function DonationForm() {
                   <div className="flex flex-col gap-5">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-semibold text-neutral-700 mb-1.5">Prenom</label>
+                        <label className="block text-sm font-semibold text-neutral-700 mb-1.5">Prenom *</label>
                         <div className="relative">
                           <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
                           <input type="text" placeholder="Jean" value={formData.firstName} onChange={(e) => setFormData({...formData, firstName: e.target.value})} className="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-neutral-200 focus:outline-none focus:border-primary-500" />
                         </div>
                       </div>
                       <div>
-                        <label className="block text-sm font-semibold text-neutral-700 mb-1.5">Nom</label>
+                        <label className="block text-sm font-semibold text-neutral-700 mb-1.5">Nom *</label>
                         <div className="relative">
                           <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
                           <input type="text" placeholder="Dupont" value={formData.lastName} onChange={(e) => setFormData({...formData, lastName: e.target.value})} className="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-neutral-200 focus:outline-none focus:border-primary-500" />
@@ -345,7 +421,7 @@ export default function DonationForm() {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-semibold text-neutral-700 mb-1.5">Email</label>
+                      <label className="block text-sm font-semibold text-neutral-700 mb-1.5">Email *</label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
                         <input type="email" placeholder="jean.dupont@email.com" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-neutral-200 focus:outline-none focus:border-primary-500" />
@@ -370,13 +446,12 @@ export default function DonationForm() {
                     </button>
                   </div>
                   <div className="flex gap-4 mt-8">
-                    <button onClick={() => setStep(1)} className="flex-1 py-4 rounded-2xl border-2 border-neutral-200 text-neutral-600 font-semibold">Retour</button>
-                    <button
-                      onClick={handleStep2Continue}
-                      disabled={!formData.firstName || !formData.email}
-                      className="flex-1 bg-primary-600 hover:bg-primary-700 disabled:bg-neutral-200 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl transition-all"
-                    >
-                      Choisir le paiement
+                    <button onClick={() => setStep(1)} className="flex-1 py-4 rounded-2xl border-2 border-neutral-200 text-neutral-600 font-semibold flex items-center justify-center gap-2">
+                      <ChevronLeft className="w-4 h-4" />Retour
+                    </button>
+                    <button onClick={handleStep2Continue} disabled={!formData.firstName || !formData.email}
+                      className="flex-1 bg-primary-600 hover:bg-primary-700 disabled:bg-neutral-200 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2">
+                      Choisir le paiement <ArrowRight className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -385,31 +460,26 @@ export default function DonationForm() {
               {step === 3 && paymentMethod === "mobile_money" && (
                 <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-6 md:p-8">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
-                      <Smartphone className="w-6 h-6 text-orange-600" />
+                    <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl flex items-center justify-center shadow-md">
+                      <Smartphone className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <h2 className="font-heading font-bold text-neutral-900 text-xl">Paiement Mobile Money</h2>
+                      <h2 className="font-heading font-bold text-neutral-900 text-xl">Mobile Money</h2>
                       <p className="text-neutral-500 text-sm">Montant : <span className="font-bold text-primary-600">{finalAmount}€</span></p>
                     </div>
                   </div>
-
                   <div className="flex flex-col gap-5">
                     <div>
-                      <label className="block text-sm font-semibold text-neutral-700 mb-2">Operateur</label>
-                      <div className="grid grid-cols-4 gap-2">
-                        {[
-                          { value: "mtn", label: "MTN", color: "bg-yellow-400 text-yellow-900" },
-                          { value: "orange", label: "Orange", color: "bg-orange-500 text-white" },
-                          { value: "moov", label: "Moov", color: "bg-blue-600 text-white" },
-                          { value: "wave", label: "Wave", color: "bg-blue-400 text-white" },
-                        ].map((op) => (
-                          <button
-                            key={op.value}
-                            onClick={() => setMobileData({...mobileData, operator: op.value})}
-                            className={`py-3 rounded-xl font-bold text-sm transition-all border-2 ${mobileData.operator === op.value ? "border-primary-600 ring-2 ring-primary-200" : "border-transparent"} ${op.color}`}
-                          >
-                            {op.label}
+                      <label className="block text-sm font-semibold text-neutral-700 mb-3">Choisissez votre operateur</label>
+                      <div className="grid grid-cols-2 gap-3">
+                        {MOBILE_OPERATORS.map((op) => (
+                          <button key={op.value} onClick={() => setMobileData({...mobileData, operator: op.value})}
+                            className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${mobileData.operator === op.value ? `${op.border} bg-opacity-10 ring-2 ring-offset-1 ring-${op.border.replace("border-", "")}` : "border-neutral-200 hover:border-neutral-300"}`}>
+                            <div className={`w-10 h-10 ${op.color} rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm`}>
+                              <span className={`font-black text-xs ${op.textColor}`}>{op.label}</span>
+                            </div>
+                            <span className="font-semibold text-neutral-800 text-sm">{op.label}</span>
+                            {mobileData.operator === op.value && <Check className="w-4 h-4 text-secondary-600 ml-auto" />}
                           </button>
                         ))}
                       </div>
@@ -418,37 +488,30 @@ export default function DonationForm() {
                       <label className="block text-sm font-semibold text-neutral-700 mb-1.5">Numero de telephone</label>
                       <div className="relative">
                         <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                        <input
-                          type="tel"
-                          placeholder="+228 XX XX XX XX"
-                          value={mobileData.phone}
-                          onChange={(e) => setMobileData({...mobileData, phone: e.target.value})}
-                          className="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-neutral-200 focus:outline-none focus:border-primary-500"
-                        />
+                        <input type="tel" placeholder="+228 XX XX XX XX" value={mobileData.phone} onChange={(e) => setMobileData({...mobileData, phone: e.target.value})} className="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-neutral-200 focus:outline-none focus:border-primary-500" />
                       </div>
-                      <p className="text-xs text-neutral-400 mt-1">Vous recevrez une notification sur ce numero</p>
+                      <p className="text-xs text-neutral-400 mt-1">Vous recevrez une notification de confirmation</p>
                     </div>
-
                     <div className="bg-orange-50 border border-orange-100 rounded-xl p-4">
-                      <p className="text-sm text-orange-800 font-medium mb-1">Comment ca fonctionne :</p>
-                      <ol className="text-xs text-orange-700 space-y-1">
-                        <li>1. Cliquez sur "Confirmer le don"</li>
-                        <li>2. Vous recevrez une notification sur votre telephone</li>
-                        <li>3. Validez le paiement avec votre code secret</li>
-                        <li>4. Le don sera confirme automatiquement</li>
+                      <p className="text-sm text-orange-800 font-semibold mb-2">Comment ca fonctionne :</p>
+                      <ol className="text-xs text-orange-700 space-y-1.5">
+                        <li className="flex items-center gap-2"><span className="w-5 h-5 bg-orange-200 rounded-full flex items-center justify-center font-bold flex-shrink-0">1</span>Cliquez sur Confirmer le don</li>
+                        <li className="flex items-center gap-2"><span className="w-5 h-5 bg-orange-200 rounded-full flex items-center justify-center font-bold flex-shrink-0">2</span>Vous recevrez une notification sur votre telephone</li>
+                        <li className="flex items-center gap-2"><span className="w-5 h-5 bg-orange-200 rounded-full flex items-center justify-center font-bold flex-shrink-0">3</span>Validez avec votre code secret</li>
+                        <li className="flex items-center gap-2"><span className="w-5 h-5 bg-orange-200 rounded-full flex items-center justify-center font-bold flex-shrink-0">4</span>Le don est confirme automatiquement</li>
                       </ol>
                     </div>
+                    <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 text-center">
+                      <p className="text-amber-800 text-xs italic">"Votre contribution aide directement a soutenir nos actions humanitaires et a ameliorer la vie des beneficiaires."</p>
+                    </div>
                   </div>
-
                   <div className="flex gap-4 mt-8">
-                    <button onClick={() => { setShowPaymentModal(true); setStep(2); }} className="flex-1 py-4 rounded-2xl border-2 border-neutral-200 text-neutral-600 font-semibold">Retour</button>
-                    <button
-                      onClick={handleSubmit}
-                      disabled={!mobileData.phone}
-                      className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:bg-neutral-200 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2"
-                    >
-                      <Smartphone className="w-5 h-5" />
-                      Confirmer {finalAmount}€
+                    <button onClick={() => { setShowPaymentModal(true); setStep(2); }} className="flex-1 py-4 rounded-2xl border-2 border-neutral-200 text-neutral-600 font-semibold flex items-center justify-center gap-2">
+                      <ChevronLeft className="w-4 h-4" />Retour
+                    </button>
+                    <button onClick={handleSubmit} disabled={!mobileData.phone}
+                      className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:bg-neutral-200 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2">
+                      <Smartphone className="w-5 h-5" />Confirmer {finalAmount}€
                     </button>
                   </div>
                 </div>
@@ -456,54 +519,65 @@ export default function DonationForm() {
 
               {step === 3 && paymentMethod === "card" && (
                 <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-6 md:p-8">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center">
-                      <CreditCard className="w-6 h-6 text-primary-600" />
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-md">
+                        <CreditCard className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <h2 className="font-heading font-bold text-neutral-900 text-xl">Carte bancaire</h2>
+                        <p className="text-neutral-500 text-sm">Montant : <span className="font-bold text-primary-600">{finalAmount}€</span></p>
+                      </div>
                     </div>
-                    <div>
-                      <h2 className="font-heading font-bold text-neutral-900 text-xl">Paiement par carte</h2>
-                      <p className="text-neutral-500 text-sm">Montant : <span className="font-bold text-primary-600">{finalAmount}€</span></p>
+                    <div className="flex items-center gap-2">
+                      <div className="bg-white border border-neutral-100 rounded-lg p-1.5 shadow-sm"><VisaLogo /></div>
+                      <div className="bg-white border border-neutral-100 rounded-lg p-1.5 shadow-sm"><MastercardLogo /></div>
+                      <div className="bg-white border border-neutral-100 rounded-lg p-1.5 shadow-sm"><AmexLogo /></div>
                     </div>
                   </div>
-
-                  <div className="bg-neutral-50 rounded-xl p-5 mb-6 space-y-3 text-sm">
-                    <div className="flex justify-between"><span className="text-neutral-500">Donateur</span><span className="font-semibold">{anonymous ? "Anonyme" : `${formData.firstName} ${formData.lastName}`}</span></div>
-                    <div className="flex justify-between"><span className="text-neutral-500">Montant</span><span className="font-bold text-primary-600 text-lg">{finalAmount}€{donationType === "mensuel" ? "/mois" : ""}</span></div>
-                    <div className="flex justify-between"><span className="text-neutral-500">Type</span><span className="font-semibold">{donationType === "mensuel" ? "Don mensuel" : "Don unique"}</span></div>
+                  <div className="bg-neutral-50 rounded-xl p-4 mb-6 flex items-center justify-between text-sm">
+                    <span className="text-neutral-500">Donateur</span>
+                    <span className="font-semibold">{anonymous ? "Anonyme" : `${formData.firstName} ${formData.lastName}`}</span>
                   </div>
-
-                  <div className="space-y-3 mb-6">
+                  <div className="space-y-4 mb-6">
                     <div>
                       <label className="block text-sm font-semibold text-neutral-700 mb-1.5">Numero de carte</label>
                       <div className="relative">
                         <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                        <input type="text" placeholder="1234 5678 9012 3456" className="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-neutral-200 focus:outline-none focus:border-primary-500 text-sm" maxLength={19} />
+                        <input type="text" placeholder="1234 5678 9012 3456" value={cardData.number} onChange={(e) => setCardData({...cardData, number: e.target.value})} className="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-neutral-200 focus:outline-none focus:border-primary-500 text-sm" maxLength={19} />
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-sm font-semibold text-neutral-700 mb-1.5">Date d expiration</label>
-                        <input type="text" placeholder="MM/AA" className="w-full px-4 py-3 rounded-xl border-2 border-neutral-200 focus:outline-none focus:border-primary-500 text-sm" maxLength={5} />
+                        <label className="block text-sm font-semibold text-neutral-700 mb-1.5">Expiration</label>
+                        <input type="text" placeholder="MM/AA" value={cardData.expiry} onChange={(e) => setCardData({...cardData, expiry: e.target.value})} className="w-full px-4 py-3 rounded-xl border-2 border-neutral-200 focus:outline-none focus:border-primary-500 text-sm" maxLength={5} />
                       </div>
                       <div>
-                        <label className="block text-sm font-semibold text-neutral-700 mb-1.5">Code de securite</label>
-                        <input type="text" placeholder="CVV" className="w-full px-4 py-3 rounded-xl border-2 border-neutral-200 focus:outline-none focus:border-primary-500 text-sm" maxLength={4} />
+                        <label className="block text-sm font-semibold text-neutral-700 mb-1.5">CVV</label>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                          <input type="password" placeholder="•••" value={cardData.cvv} onChange={(e) => setCardData({...cardData, cvv: e.target.value})} className="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-neutral-200 focus:outline-none focus:border-primary-500 text-sm" maxLength={4} />
+                        </div>
                       </div>
                     </div>
                     <div>
                       <label className="block text-sm font-semibold text-neutral-700 mb-1.5">Nom sur la carte</label>
-                      <input type="text" placeholder="JEAN DUPONT" className="w-full px-4 py-3 rounded-xl border-2 border-neutral-200 focus:outline-none focus:border-primary-500 text-sm uppercase" />
+                      <input type="text" placeholder="JEAN DUPONT" value={cardData.name} onChange={(e) => setCardData({...cardData, name: e.target.value.toUpperCase()})} className="w-full px-4 py-3 rounded-xl border-2 border-neutral-200 focus:outline-none focus:border-primary-500 text-sm uppercase" />
                     </div>
                   </div>
-
+                  <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 text-center mb-4">
+                    <p className="text-amber-800 text-xs italic">"Votre contribution aide directement a soutenir nos actions humanitaires et a ameliorer la vie des beneficiaires."</p>
+                  </div>
                   <div className="flex items-center gap-2 text-xs text-neutral-400 mb-6 p-3 bg-neutral-50 rounded-xl">
                     <Shield className="w-4 h-4 text-secondary-600 flex-shrink-0" />
-                    <span>Paiement securise par chiffrement SSL 256-bit. Vos donnees bancaires sont protegees.</span>
+                    <span>Paiement securise par chiffrement SSL 256-bit. Vos donnees bancaires sont totalement protegees.</span>
                   </div>
-
                   <div className="flex gap-4">
-                    <button onClick={() => { setShowPaymentModal(true); setStep(2); }} className="flex-1 py-4 rounded-2xl border-2 border-neutral-200 text-neutral-600 font-semibold">Retour</button>
-                    <button onClick={handleSubmit} className="flex-1 bg-secondary-600 hover:bg-secondary-700 text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2">
+                    <button onClick={() => { setShowPaymentModal(true); setStep(2); }} className="flex-1 py-4 rounded-2xl border-2 border-neutral-200 text-neutral-600 font-semibold flex items-center justify-center gap-2">
+                      <ChevronLeft className="w-4 h-4" />Retour
+                    </button>
+                    <button onClick={handleSubmit}
+                      className="flex-1 bg-secondary-600 hover:bg-secondary-700 text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2">
                       <Heart className="w-5 h-5 fill-white" />Confirmer {finalAmount}€
                     </button>
                   </div>
@@ -523,8 +597,13 @@ export default function DonationForm() {
                   </div>
                 ) : <p className="text-white/60 text-sm mb-6">Choisissez un montant pour voir votre impact.</p>}
                 <div className="border-t border-white/20 pt-4 mb-4">
-                  <div className="flex items-center justify-between mb-2"><span className="text-sm text-white/70">Votre don</span><span className="font-bold text-secondary-400 text-lg">{finalAmount > 0 ? finalAmount + "€" : "-"}{donationType === "mensuel" && finalAmount > 0 ? "/mois" : ""}</span></div>
-                  <div className="h-2 bg-white/10 rounded-full overflow-hidden"><div className="h-full w-[98%] bg-secondary-500 rounded-full" /></div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-white/70">Votre don</span>
+                    <span className="font-bold text-secondary-400 text-lg">{finalAmount > 0 ? finalAmount + "€" : "-"}{donationType === "mensuel" && finalAmount > 0 ? "/mois" : ""}</span>
+                  </div>
+                  <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-full w-[98%] bg-secondary-500 rounded-full" />
+                  </div>
                   <p className="text-xs text-white/50 mt-2 text-center">98% sur le terrain</p>
                 </div>
                 <div className="border-t border-white/20 pt-4">
