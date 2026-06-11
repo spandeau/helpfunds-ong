@@ -1,16 +1,25 @@
 ﻿import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import { notFound } from "next/navigation";
+import { getProjectBySlug, getAllProjects } from "@/lib/projects";
 import { PROJECTS } from "@/lib/projects-data";
-import { ArrowLeft, MapPin, Users, Calendar, Heart, Check, Target, TrendingUp, Share2, Clock, AlertTriangle, Sparkles, CheckCircle } from "lucide-react";
+import {
+  ArrowLeft, MapPin, Users, Calendar, Heart, Check,
+  Target, TrendingUp, Share2, Clock, AlertTriangle,
+  Sparkles, CheckCircle, Shield, FileText,
+} from "lucide-react";
 
 export async function generateStaticParams() {
-  return PROJECTS.map((p) => ({ slug: p.slug }));
+  const projects = await getAllProjects();
+  return projects.map((p) => ({ slug: p.slug }));
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+export async function generateMetadata(
+  { params }: { params: Promise<{ slug: string }> }
+): Promise<Metadata> {
   const { slug } = await params;
-  const project = PROJECTS.find((p) => p.slug === slug);
+  const project = await getProjectBySlug(slug);
   return {
     title: project ? `${project.title} — Help Funds` : "Projet — Help Funds",
     description: project?.shortDescription || "",
@@ -18,10 +27,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 const STATUS_CONFIG = {
-  "urgent": { label: "Urgent", color: "bg-red-100 text-red-700", icon: AlertTriangle },
+  urgent: { label: "Urgent", color: "bg-red-100 text-red-700", icon: AlertTriangle },
   "en-cours": { label: "En cours", color: "bg-secondary-100 text-secondary-700", icon: Clock },
-  "termine": { label: "Termine", color: "bg-neutral-100 text-neutral-600", icon: CheckCircle },
-  "nouveau": { label: "Nouveau", color: "bg-primary-100 text-primary-700", icon: Sparkles },
+  termine: { label: "Termine", color: "bg-neutral-100 text-neutral-600", icon: CheckCircle },
+  nouveau: { label: "Nouveau", color: "bg-primary-100 text-primary-700", icon: Sparkles },
 };
 
 const CAT_LABELS: Record<string, string> = {
@@ -33,26 +42,19 @@ function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", minimumFractionDigits: 0 }).format(amount);
 }
 
-export default async function ProjetDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function ProjetDetailPage(
+  { params }: { params: Promise<{ slug: string }> }
+) {
   const { slug } = await params;
-  const project = PROJECTS.find((p) => p.slug === slug);
+  const project = await getProjectBySlug(slug);
 
-  if (!project) {
-    return (
-      <main className="min-h-screen flex items-center justify-center pt-20">
-        <div className="text-center">
-          <div className="text-6xl mb-4">🔍</div>
-          <h1 className="font-heading font-bold text-2xl mb-4">Projet introuvable</h1>
-          <Link href="/projets" className="bg-primary-600 text-white px-6 py-3 rounded-xl font-semibold">Voir tous les projets</Link>
-        </div>
-      </main>
-    );
-  }
+  if (!project) notFound();
 
   const progress = Math.min(Math.round((project.raisedAmount / project.goalAmount) * 100), 100);
   const remaining = project.goalAmount - project.raisedAmount;
-  const status = STATUS_CONFIG[project.status];
+  const status = STATUS_CONFIG[project.status] || STATUS_CONFIG["en-cours"];
   const StatusIcon = status.icon;
+  const relatedProjects = PROJECTS.filter((p) => p.slug !== slug && p.category === project.category).slice(0, 3);
 
   return (
     <main>
@@ -91,10 +93,10 @@ export default async function ProjetDetailPage({ params }: { params: Promise<{ s
       <section className="py-12 bg-neutral-50">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-            <div className="lg:col-span-2 space-y-8">
+            <div className="lg:col-span-2 space-y-6">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                  { icon: MapPin, label: "Localisation", value: `${project.region}, ${project.country}` },
+                  { icon: MapPin, label: "Localisation", value: `${project.region || ""} ${project.country}`.trim() },
                   { icon: Users, label: "Beneficiaires", value: `${project.beneficiaries.toLocaleString("fr-FR")} / ${project.beneficiariesTarget.toLocaleString("fr-FR")}` },
                   { icon: Calendar, label: "Debut", value: new Date(project.startDate).toLocaleDateString("fr-FR", { month: "short", year: "numeric" }) },
                   { icon: Target, label: "Equipe", value: `${project.team} membres` },
@@ -114,23 +116,25 @@ export default async function ProjetDetailPage({ params }: { params: Promise<{ s
                 ))}
               </div>
 
-              <div className="bg-secondary-50 rounded-2xl p-6 border border-secondary-100">
-                <h2 className="font-heading font-bold text-neutral-900 text-xl mb-5 flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-secondary-600" />Ce qui a deja ete accompli
-                </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {project.results.map((result, i) => (
-                    <div key={i} className="flex items-start gap-3 bg-white rounded-xl p-3 border border-secondary-100">
-                      <div className="w-6 h-6 bg-secondary-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <Check className="w-3.5 h-3.5 text-white" />
+              {project.results && project.results.length > 0 && (
+                <div className="bg-secondary-50 rounded-2xl p-6 border border-secondary-100">
+                  <h2 className="font-heading font-bold text-neutral-900 text-xl mb-5 flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-secondary-600" />Ce qui a deja ete accompli
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {project.results.map((result, i) => (
+                      <div key={i} className="flex items-start gap-3 bg-white rounded-xl p-3 border border-secondary-100">
+                        <div className="w-6 h-6 bg-secondary-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <Check className="w-3.5 h-3.5 text-white" />
+                        </div>
+                        <span className="text-neutral-700 text-sm font-medium">{result}</span>
                       </div>
-                      <span className="text-neutral-700 text-sm font-medium">{result}</span>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
-              {project.remaining.length > 0 && (
+              {project.remaining && project.remaining.length > 0 && (
                 <div className="bg-white rounded-2xl p-6 border border-neutral-100">
                   <h2 className="font-heading font-bold text-neutral-900 text-xl mb-5 flex items-center gap-2">
                     <Target className="w-5 h-5 text-primary-600" />Ce qu il reste a accomplir
@@ -166,60 +170,26 @@ export default async function ProjetDetailPage({ params }: { params: Promise<{ s
                 </div>
               )}
 
-              <div className="bg-white rounded-2xl p-6 border border-neutral-100">
-                <h2 className="font-heading font-bold text-neutral-900 text-xl mb-5">Comment les dons sont utilises</h2>
-                <div className="space-y-3">
-                  {project.budgetBreakdown.map((item) => (
-                    <div key={item.label}>
-                      <div className="flex justify-between items-center mb-1.5">
-                        <span className="text-sm font-medium text-neutral-700">{item.label}</span>
-                        <span className="text-sm font-bold text-neutral-900">{item.percentage}%</span>
-                      </div>
-                      <div className="h-2.5 bg-neutral-100 rounded-full overflow-hidden">
-                        <div className="h-full rounded-full transition-all duration-700" style={{ width: `${item.percentage}%`, backgroundColor: item.color }} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl p-6 border border-neutral-100">
-                <h2 className="font-heading font-bold text-neutral-900 text-xl mb-5">Avancement du projet</h2>
-                <div className="relative">
-                  <div className="absolute left-4 top-0 bottom-0 w-px bg-neutral-100" />
-                  <div className="space-y-6">
-                    {project.milestones.map((milestone, i) => (
-                      <div key={i} className="relative flex gap-4 pl-2">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 z-10 border-2 ${milestone.done ? "bg-secondary-500 border-secondary-500" : "bg-white border-neutral-200"}`}>
-                          {milestone.done ? <Check className="w-4 h-4 text-white" /> : <div className="w-2 h-2 bg-neutral-300 rounded-full" />}
-                        </div>
-                        <div className="flex-1 pb-2">
-                          <div className="text-xs text-neutral-400 font-medium mb-0.5">{milestone.date}</div>
-                          <h4 className={`font-bold text-sm mb-1 ${milestone.done ? "text-neutral-900" : "text-neutral-400"}`}>{milestone.title}</h4>
-                          <p className={`text-xs leading-relaxed ${milestone.done ? "text-neutral-500" : "text-neutral-300"}`}>{milestone.description}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {project.updates.length > 0 && (
+              {project.budgetBreakdown && project.budgetBreakdown.length > 0 && (
                 <div className="bg-white rounded-2xl p-6 border border-neutral-100">
-                  <h2 className="font-heading font-bold text-neutral-900 text-xl mb-5">Actualites du projet</h2>
-                  <div className="space-y-5">
-                    {project.updates.map((update, i) => (
-                      <div key={i} className="border-l-2 border-primary-200 pl-4">
-                        <div className="text-xs text-neutral-400 font-medium mb-1">{update.date}</div>
-                        <h4 className="font-bold text-neutral-900 mb-2">{update.title}</h4>
-                        <p className="text-sm text-neutral-600 leading-relaxed">{update.content}</p>
+                  <h2 className="font-heading font-bold text-neutral-900 text-xl mb-5">Utilisation des dons</h2>
+                  <div className="space-y-3">
+                    {project.budgetBreakdown.map((item) => (
+                      <div key={item.label}>
+                        <div className="flex justify-between items-center mb-1.5">
+                          <span className="text-sm font-medium text-neutral-700">{item.label}</span>
+                          <span className="text-sm font-bold text-neutral-900">{item.percentage}%</span>
+                        </div>
+                        <div className="h-2.5 bg-neutral-100 rounded-full overflow-hidden">
+                          <div className="h-full rounded-full transition-all duration-700" style={{ width: `${item.percentage}%`, backgroundColor: item.color }} />
+                        </div>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
 
-              {project.testimonials.length > 0 && (
+              {project.testimonials && project.testimonials.length > 0 && (
                 <div className="bg-white rounded-2xl p-6 border border-neutral-100">
                   <h2 className="font-heading font-bold text-neutral-900 text-xl mb-5">Temoignages</h2>
                   <div className="space-y-5">
@@ -238,6 +208,26 @@ export default async function ProjetDetailPage({ params }: { params: Promise<{ s
                   </div>
                 </div>
               )}
+
+              {relatedProjects.length > 0 && (
+                <div className="bg-white rounded-2xl p-6 border border-neutral-100">
+                  <h2 className="font-heading font-bold text-neutral-900 text-xl mb-5">Projets similaires</h2>
+                  <div className="space-y-3">
+                    {relatedProjects.map((p) => (
+                      <Link key={p.id} href={`/projets/${p.slug}`} className="flex items-center gap-4 p-3 rounded-xl hover:bg-neutral-50 border border-neutral-100 hover:border-primary-200 transition-all group">
+                        <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0">
+                          <Image src={p.images[0]} alt={p.title} fill className="object-cover" sizes="56px" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-neutral-900 text-sm truncate group-hover:text-primary-600 transition-colors">{p.title}</p>
+                          <p className="text-neutral-400 text-xs">{p.country}</p>
+                        </div>
+                        <ArrowLeft className="w-4 h-4 text-neutral-300 group-hover:text-primary-600 rotate-180 transition-colors flex-shrink-0" />
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="lg:col-span-1">
@@ -247,25 +237,14 @@ export default async function ProjetDetailPage({ params }: { params: Promise<{ s
                   <div className="text-3xl font-heading font-bold text-primary-600 mb-1">{formatCurrency(project.raisedAmount)}</div>
                   <div className="text-sm text-neutral-400 mb-3">collectes sur {formatCurrency(project.goalAmount)}</div>
                   <div className="h-3 bg-neutral-100 rounded-full overflow-hidden mb-2">
-                    <div className={`h-full rounded-full ${progress === 100 ? "bg-secondary-500" : project.status === "urgent" ? "bg-gradient-to-r from-red-500 to-orange-500" : "bg-gradient-to-r from-primary-500 to-secondary-500"}`} style={{ width: `${progress}%` }} />
+                    <div
+                      className={`h-full rounded-full ${progress === 100 ? "bg-secondary-500" : project.status === "urgent" ? "bg-gradient-to-r from-red-500 to-orange-500" : "bg-gradient-to-r from-primary-500 to-secondary-500"}`}
+                      style={{ width: `${progress}%` }}
+                    />
                   </div>
-                  <div className="flex justify-between text-sm mb-4">
+                  <div className="flex justify-between text-sm mb-5">
                     <span className="font-bold text-neutral-700">{progress}% atteint</span>
                     {project.status !== "termine" && <span className="text-orange-600 font-semibold">{formatCurrency(remaining)} restants</span>}
-                  </div>
-                  <div className="space-y-2 mb-5 text-sm">
-                    <div className="flex justify-between border-b border-neutral-50 pb-2">
-                      <span className="text-neutral-500">Beneficiaires</span>
-                      <span className="font-bold">{project.beneficiaries.toLocaleString("fr-FR")} / {project.beneficiariesTarget.toLocaleString("fr-FR")}</span>
-                    </div>
-                    <div className="flex justify-between border-b border-neutral-50 pb-2">
-                      <span className="text-neutral-500">Villages</span>
-                      <span className="font-bold">{project.villages}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-neutral-500">Equipe terrain</span>
-                      <span className="font-bold">{project.team} membres</span>
-                    </div>
                   </div>
                   {project.status !== "termine" && (
                     <Link href="/don" className="w-full flex items-center justify-center gap-2 bg-secondary-600 hover:bg-secondary-700 text-white font-bold py-4 rounded-2xl transition-all hover:shadow-lg">
@@ -277,20 +256,30 @@ export default async function ProjetDetailPage({ params }: { params: Promise<{ s
                   </Link>
                 </div>
 
-                <div className="bg-white rounded-2xl p-6 border border-neutral-100">
-                  <h3 className="font-heading font-bold text-neutral-900 mb-4 flex items-center gap-2">
-                    <Target className="w-4 h-4 text-primary-600" />Objectifs
-                  </h3>
-                  <ul className="space-y-2">
-                    {project.objectives.slice(0, 4).map((obj, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-neutral-600">
-                        <div className="w-4 h-4 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <span className="text-primary-600 font-bold text-[10px]">{i + 1}</span>
-                        </div>
-                        {obj}
-                      </li>
-                    ))}
-                  </ul>
+                {project.objectives && project.objectives.length > 0 && (
+                  <div className="bg-white rounded-2xl p-6 border border-neutral-100">
+                    <h3 className="font-heading font-bold text-neutral-900 mb-4 flex items-center gap-2">
+                      <Target className="w-4 h-4 text-primary-600" />Objectifs
+                    </h3>
+                    <ul className="space-y-2">
+                      {project.objectives.slice(0, 5).map((obj, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm text-neutral-600">
+                          <div className="w-4 h-4 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <span className="text-primary-600 font-bold text-[10px]">{i + 1}</span>
+                          </div>
+                          {obj}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                <div className="bg-white rounded-2xl p-5 border border-neutral-100">
+                  <div className="flex flex-col items-center gap-3 text-xs text-neutral-400 text-center">
+                    <div className="flex items-center gap-1"><Shield className="w-3.5 h-3.5 text-secondary-500" />Paiement securise</div>
+                    <div className="flex items-center gap-1"><FileText className="w-3.5 h-3.5 text-secondary-500" />Recu fiscal automatique</div>
+                    <div className="flex items-center gap-1"><TrendingUp className="w-3.5 h-3.5 text-secondary-500" />98% sur le terrain</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -303,9 +292,9 @@ export default async function ProjetDetailPage({ params }: { params: Promise<{ s
               <Link href="/don" className="inline-flex items-center justify-center gap-2 bg-secondary-600 hover:bg-secondary-500 text-white font-bold px-10 py-4 rounded-2xl transition-all hover:-translate-y-1 shadow-lg text-lg">
                 <Heart className="w-5 h-5 fill-white" />Faire un don
               </Link>
-              <button className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white font-semibold px-10 py-4 rounded-2xl transition-all border border-white/20 text-lg">
-                <Share2 className="w-5 h-5" />Partager le projet
-              </button>
+              <Link href="/projets" className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white font-semibold px-10 py-4 rounded-2xl transition-all border border-white/20 text-lg">
+                <ArrowLeft className="w-5 h-5" />Voir tous les projets
+              </Link>
             </div>
           </div>
         </div>

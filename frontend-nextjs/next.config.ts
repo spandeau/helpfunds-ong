@@ -17,6 +17,11 @@ const nextConfig: NextConfig = {
         port: "1337",
         pathname: "/uploads/**",
       },
+      {
+        protocol: "https",
+        hostname: "helpfunds-ong-production.up.railway.app",
+        pathname: "/uploads/**",
+      },
     ],
   },
 };

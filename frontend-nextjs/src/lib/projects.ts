@@ -32,14 +32,13 @@ interface StrapiProject {
   gallery?: { url: string }[];
 }
 
+function toUrl(url?: string): string {
+  if (!url) return "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=1200&q=80";
+  const BASE = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+  return url.startsWith("http") ? url : `${BASE}${url}`;
+}
+
 function strapiProjectToProject(p: StrapiProject): Project {
-  const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
-
-  const getImageUrl = (url?: string) => {
-    if (!url) return "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=1200&q=80";
-    return url.startsWith("http") ? url : `${STRAPI_URL}${url}`;
-  };
-
   return {
     id: p.id,
     slug: p.slug,
@@ -47,7 +46,7 @@ function strapiProjectToProject(p: StrapiProject): Project {
     shortDescription: p.shortDescription,
     description: p.description || p.shortDescription,
     category: p.category || "sante",
-    country: p.country || "Inconnu",
+    country: p.country || "",
     region: p.region || "",
     status: p.status || "en-cours",
     featured: p.featured || false,
@@ -56,8 +55,8 @@ function strapiProjectToProject(p: StrapiProject): Project {
     beneficiaries: p.beneficiaries || 0,
     beneficiariesTarget: p.beneficiariesTarget || p.beneficiaries || 0,
     images: [
-      getImageUrl(p.coverImage?.url),
-      ...(p.gallery?.map((g) => getImageUrl(g.url)) || []),
+      toUrl(p.coverImage?.url),
+      ...(p.gallery?.map((g) => toUrl(g.url)) || []),
     ],
     startDate: p.startDate || new Date().toISOString().split("T")[0],
     endDate: p.endDate,
@@ -76,7 +75,7 @@ function strapiProjectToProject(p: StrapiProject): Project {
 export async function getAllProjects(): Promise<Project[]> {
   try {
     const result = await strapiClient.fetch<{ data: StrapiProject[] }>(
-      "/projects?populate=coverImage,gallery&sort=createdAt:desc&pagination[pageSize]=50"
+      "/projects?populate[coverImage]=true&populate[gallery]=true&sort=createdAt:desc&pagination[pageSize]=50"
     );
     if (result?.data && result.data.length > 0) {
       console.log(`[Projects] ${result.data.length} projets depuis Strapi`);
@@ -91,7 +90,7 @@ export async function getAllProjects(): Promise<Project[]> {
 export async function getProjectBySlug(slug: string): Promise<Project | null> {
   try {
     const result = await strapiClient.fetch<{ data: StrapiProject[] }>(
-      `/projects?filters[slug][$eq]=${slug}&populate=coverImage,gallery`
+      `/projects?filters[slug][$eq]=${slug}&populate[coverImage]=true&populate[gallery]=true`
     );
     if (result?.data && result.data.length > 0) {
       return strapiProjectToProject(result.data[0]);
@@ -105,7 +104,7 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
 export async function getFeaturedProjects(): Promise<Project[]> {
   try {
     const result = await strapiClient.fetch<{ data: StrapiProject[] }>(
-      "/projects?filters[featured][$eq]=true&populate=coverImage&pagination[pageSize]=6"
+      "/projects?filters[featured][$eq]=true&populate[coverImage]=true&pagination[pageSize]=6"
     );
     if (result?.data && result.data.length > 0) {
       return result.data.map(strapiProjectToProject);

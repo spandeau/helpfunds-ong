@@ -1,302 +1,133 @@
 ﻿import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { notFound } from "next/navigation";
-import { getProjectBySlug, getAllProjects } from "@/lib/projects";
-import { PROJECTS } from "@/lib/projects-data";
-import {
-  ArrowLeft, MapPin, Users, Calendar, Heart, Check,
-  Target, TrendingUp, Share2, Clock, AlertTriangle,
-  Sparkles, CheckCircle, Shield, FileText
-} from "lucide-react";
+import { getAllProjects } from "@/lib/projects";
+import { MapPin, Users, Heart, Clock, AlertTriangle, Sparkles, CheckCircle } from "lucide-react";
 
-export async function generateStaticParams() {
-  const projects = await getAllProjects();
-  return projects.map((p) => ({ slug: p.slug }));
-}
-
-export async function generateMetadata(
-  { params }: { params: Promise<{ slug: string }> }
-): Promise<Metadata> {
-  const { slug } = await params;
-  const project = await getProjectBySlug(slug);
-  return {
-    title: project ? `${project.title} — Help Funds` : "Projet — Help Funds",
-    description: project?.shortDescription || "",
-  };
-}
+export const metadata: Metadata = {
+  title: "Nos Projets — Help Funds",
+  description: "Decouvrez tous les projets humanitaires de Help Funds dans le monde.",
+};
 
 const STATUS_CONFIG = {
-  "urgent": { label: "Urgent", color: "bg-red-100 text-red-700", icon: AlertTriangle },
+  urgent: { label: "Urgent", color: "bg-red-100 text-red-700", icon: AlertTriangle },
   "en-cours": { label: "En cours", color: "bg-secondary-100 text-secondary-700", icon: Clock },
-  "termine": { label: "Termine", color: "bg-neutral-100 text-neutral-600", icon: CheckCircle },
-  "nouveau": { label: "Nouveau", color: "bg-primary-100 text-primary-700", icon: Sparkles },
-};
+  termine: { label: "Termine", color: "bg-neutral-100 text-neutral-600", icon: CheckCircle },
+  nouveau: { label: "Nouveau", color: "bg-primary-100 text-primary-700", icon: Sparkles },
+} as const;
 
 const CAT_LABELS: Record<string, string> = {
   sante: "Sante", education: "Education", eau: "Eau & assainissement",
   alimentation: "Nutrition", logement: "Logement", economie: "Economie",
 };
 
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", minimumFractionDigits: 0 }).format(amount);
+function formatCurrency(n: number) {
+  return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", minimumFractionDigits: 0 }).format(n);
 }
 
-export default async function ProjetDetailPage(
-  { params }: { params: Promise<{ slug: string }> }
-) {
-  const { slug } = await params;
-  const project = await getProjectBySlug(slug);
-
-  if (!project) notFound();
-
-  const progress = Math.min(Math.round((project.raisedAmount / project.goalAmount) * 100), 100);
-  const remaining = project.goalAmount - project.raisedAmount;
-  const status = STATUS_CONFIG[project.status] || STATUS_CONFIG["en-cours"];
-  const StatusIcon = status.icon;
-  const relatedProjects = PROJECTS.filter((p) => p.slug !== slug && p.category === project.category).slice(0, 3);
+export default async function ProjetsPage() {
+  const projects = await getAllProjects();
 
   return (
-    <main>
-      <div className="relative h-[60vh] min-h-[450px] overflow-hidden">
-        <Image src={project.images[0]} alt={project.title} fill className="object-cover" priority sizes="100vw" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20" />
-        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12">
-          <div className="max-w-5xl mx-auto">
-            <Link href="/projets" className="inline-flex items-center gap-2 text-white/70 hover:text-white text-sm font-medium mb-5 transition-colors">
-              <ArrowLeft className="w-4 h-4" />Retour aux projets
-            </Link>
-            <div className="flex flex-wrap gap-2 mb-4">
-              <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full ${status.color}`}>
-                <StatusIcon className="w-3.5 h-3.5" />{status.label}
-              </span>
-              <span className="bg-white/20 backdrop-blur text-white text-xs font-bold px-3 py-1.5 rounded-full">
-                {CAT_LABELS[project.category] || project.category}
-              </span>
-            </div>
-            <h1 className="font-heading font-bold text-white text-3xl md:text-5xl mb-4 leading-tight">{project.title}</h1>
-            <p className="text-white/80 text-lg max-w-2xl mb-6">{project.shortDescription}</p>
-            <div className="flex flex-wrap gap-3">
-              {project.status !== "termine" && (
-                <Link href="/don" className="inline-flex items-center gap-2 bg-secondary-600 hover:bg-secondary-500 text-white font-bold px-6 py-3 rounded-xl transition-all hover:-translate-y-0.5 shadow-lg">
-                  <Heart className="w-4 h-4 fill-white" />Soutenir ce projet
-                </Link>
-              )}
-              <button className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-semibold px-6 py-3 rounded-xl transition-all border border-white/20">
-                <Share2 className="w-4 h-4" />Partager
-              </button>
-            </div>
+    <main className="min-h-screen bg-neutral-50">
+      <section className="bg-white border-b border-neutral-100 pt-28 pb-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-2xl">
+            <span className="inline-block bg-primary-100 text-primary-700 text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
+              Nos Projets
+            </span>
+            <h1 className="font-heading font-bold text-neutral-900 text-4xl md:text-5xl leading-tight">
+              Des projets qui transforment des vies
+            </h1>
+            <p className="mt-4 text-neutral-500 text-lg">
+              Chaque projet represente des communautes que nous accompagnons vers un avenir meilleur.
+            </p>
           </div>
         </div>
-      </div>
+      </section>
 
-      <section className="py-12 bg-neutral-50">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-
-            <div className="lg:col-span-2 space-y-6">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {[
-                  { icon: MapPin, label: "Localisation", value: `${project.region || ""} ${project.country}`.trim() },
-                  { icon: Users, label: "Beneficiaires", value: `${project.beneficiaries.toLocaleString("fr-FR")} / ${project.beneficiariesTarget.toLocaleString("fr-FR")}` },
-                  { icon: Calendar, label: "Debut", value: new Date(project.startDate).toLocaleDateString("fr-FR", { month: "short", year: "numeric" }) },
-                  { icon: Target, label: "Equipe", value: `${project.team} membres` },
-                ].map(({ icon: Icon, label, value }) => (
-                  <div key={label} className="bg-white rounded-2xl p-4 border border-neutral-100 text-center">
-                    <Icon className="w-5 h-5 text-primary-600 mx-auto mb-2" />
-                    <p className="text-xs text-neutral-400 mb-1">{label}</p>
-                    <p className="text-sm font-bold text-neutral-900 leading-tight">{value}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="bg-white rounded-2xl p-6 border border-neutral-100">
-                <h2 className="font-heading font-bold text-neutral-900 text-xl mb-4">Notre mission</h2>
-                {project.description.split("\n\n").map((para, i) => (
-                  <p key={i} className="text-neutral-600 leading-relaxed mb-4 last:mb-0">{para}</p>
-                ))}
-              </div>
-
-              {project.results && project.results.length > 0 && (
-                <div className="bg-secondary-50 rounded-2xl p-6 border border-secondary-100">
-                  <h2 className="font-heading font-bold text-neutral-900 text-xl mb-5 flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-secondary-600" />Ce qui a deja ete accompli
-                  </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {project.results.map((result, i) => (
-                      <div key={i} className="flex items-start gap-3 bg-white rounded-xl p-3 border border-secondary-100">
-                        <div className="w-6 h-6 bg-secondary-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <Check className="w-3.5 h-3.5 text-white" />
-                        </div>
-                        <span className="text-neutral-700 text-sm font-medium">{result}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {project.remaining && project.remaining.length > 0 && (
-                <div className="bg-white rounded-2xl p-6 border border-neutral-100">
-                  <h2 className="font-heading font-bold text-neutral-900 text-xl mb-5 flex items-center gap-2">
-                    <Target className="w-5 h-5 text-primary-600" />Ce qu il reste a accomplir
-                  </h2>
-                  <div className="space-y-3 mb-5">
-                    {project.remaining.map((item, i) => (
-                      <div key={i} className="flex items-start gap-3">
-                        <div className="w-6 h-6 bg-neutral-100 border-2 border-dashed border-neutral-300 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <span className="text-neutral-400 font-bold text-xs">{i + 1}</span>
-                        </div>
-                        <span className="text-neutral-600 text-sm">{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                  {project.status !== "termine" && (
-                    <Link href="/don" className="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-all">
-                      <Heart className="w-4 h-4 fill-white" />Aider a completer ce projet
-                    </Link>
-                  )}
-                </div>
-              )}
-
-              {project.images.length > 1 && (
-                <div className="bg-white rounded-2xl p-6 border border-neutral-100">
-                  <h2 className="font-heading font-bold text-neutral-900 text-xl mb-4">Galerie du projet</h2>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {project.images.map((img, i) => (
-                      <div key={i} className="relative h-32 rounded-xl overflow-hidden">
-                        <Image src={img} alt={`Photo ${i + 1}`} fill className="object-cover hover:scale-105 transition-transform duration-300" sizes="(max-width: 640px) 50vw, 33vw" />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {project.budgetBreakdown && project.budgetBreakdown.length > 0 && (
-                <div className="bg-white rounded-2xl p-6 border border-neutral-100">
-                  <h2 className="font-heading font-bold text-neutral-900 text-xl mb-5">Utilisation des dons</h2>
-                  <div className="space-y-3">
-                    {project.budgetBreakdown.map((item) => (
-                      <div key={item.label}>
-                        <div className="flex justify-between items-center mb-1.5">
-                          <span className="text-sm font-medium text-neutral-700">{item.label}</span>
-                          <span className="text-sm font-bold text-neutral-900">{item.percentage}%</span>
-                        </div>
-                        <div className="h-2.5 bg-neutral-100 rounded-full overflow-hidden">
-                          <div className="h-full rounded-full transition-all duration-700" style={{ width: `${item.percentage}%`, backgroundColor: item.color }} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {project.testimonials && project.testimonials.length > 0 && (
-                <div className="bg-white rounded-2xl p-6 border border-neutral-100">
-                  <h2 className="font-heading font-bold text-neutral-900 text-xl mb-5">Temoignages</h2>
-                  <div className="space-y-5">
-                    {project.testimonials.map((t, i) => (
-                      <div key={i} className="bg-neutral-50 rounded-2xl p-5 border border-neutral-100">
-                        <p className="text-neutral-600 italic mb-4 leading-relaxed">&ldquo;{t.text}&rdquo;</p>
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center text-white font-bold text-sm">{t.avatar}</div>
-                          <div>
-                            <div className="font-semibold text-neutral-900 text-sm">{t.name}</div>
-                            <div className="text-xs text-neutral-400">{t.role}</div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {relatedProjects.length > 0 && (
-                <div className="bg-white rounded-2xl p-6 border border-neutral-100">
-                  <h2 className="font-heading font-bold text-neutral-900 text-xl mb-5">Projets similaires</h2>
-                  <div className="space-y-3">
-                    {relatedProjects.map((p) => (
-                      <Link key={p.id} href={`/projets/${p.slug}`} className="flex items-center gap-4 p-3 rounded-xl hover:bg-neutral-50 border border-neutral-100 hover:border-primary-200 transition-all group">
-                        <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0">
-                          <Image src={p.images[0]} alt={p.title} fill className="object-cover" sizes="56px" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-bold text-neutral-900 text-sm truncate group-hover:text-primary-600 transition-colors">{p.title}</p>
-                          <p className="text-neutral-400 text-xs">{p.country}</p>
-                        </div>
-                        <ArrowLeft className="w-4 h-4 text-neutral-300 group-hover:text-primary-600 rotate-180 transition-colors flex-shrink-0" />
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
+      <section className="py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {projects.length === 0 ? (
+            <div className="text-center py-20">
+              <p className="text-neutral-400 text-lg">Aucun projet disponible pour le moment.</p>
             </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {projects.map((project) => {
+                const status = STATUS_CONFIG[project.status] || STATUS_CONFIG["en-cours"];
+                const StatusIcon = status.icon;
+                const progress = project.goalAmount > 0
+                  ? Math.min(Math.round((project.raisedAmount / project.goalAmount) * 100), 100)
+                  : 0;
 
-            <div className="lg:col-span-1">
-              <div className="sticky top-28 space-y-5">
-                <div className="bg-white rounded-2xl p-6 border border-neutral-100 shadow-sm">
-                  <h3 className="font-heading font-bold text-neutral-900 mb-4">Financement</h3>
-                  <div className="text-3xl font-heading font-bold text-primary-600 mb-1">{formatCurrency(project.raisedAmount)}</div>
-                  <div className="text-sm text-neutral-400 mb-3">collectes sur {formatCurrency(project.goalAmount)}</div>
-                  <div className="h-3 bg-neutral-100 rounded-full overflow-hidden mb-2">
-                    <div
-                      className={`h-full rounded-full ${progress === 100 ? "bg-secondary-500" : project.status === "urgent" ? "bg-gradient-to-r from-red-500 to-orange-500" : "bg-gradient-to-r from-primary-500 to-secondary-500"}`}
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-                  <div className="flex justify-between text-sm mb-5">
-                    <span className="font-bold text-neutral-700">{progress}% atteint</span>
-                    {project.status !== "termine" && <span className="text-orange-600 font-semibold">{formatCurrency(remaining)} restants</span>}
-                  </div>
-                  {project.status !== "termine" && (
-                    <Link href="/don" className="w-full flex items-center justify-center gap-2 bg-secondary-600 hover:bg-secondary-700 text-white font-bold py-4 rounded-2xl transition-all hover:shadow-lg">
-                      <Heart className="w-5 h-5 fill-white" />Soutenir ce projet
-                    </Link>
-                  )}
-                  <Link href="/projets" className="w-full flex items-center justify-center gap-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-semibold py-3 rounded-xl transition-all mt-3 text-sm">
-                    <ArrowLeft className="w-4 h-4" />Tous les projets
+                return (
+                  <Link
+                    key={project.id}
+                    href={`/projets/${project.slug}`}
+                    className="group bg-white rounded-2xl overflow-hidden border border-neutral-100 hover:border-primary-200 hover:shadow-lg transition-all duration-300 flex flex-col"
+                  >
+                    <div className="relative h-48 overflow-hidden">
+                      <Image
+                        src={project.images[0]}
+                        alt={project.title}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      />
+                      <div className="absolute top-3 left-3 flex gap-2 flex-wrap">
+                        <span className={`inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full ${status.color}`}>
+                          <StatusIcon className="w-3 h-3" />{status.label}
+                        </span>
+                        {project.category && (
+                          <span className="bg-white/90 text-neutral-700 text-xs font-bold px-2.5 py-1 rounded-full">
+                            {CAT_LABELS[project.category] || project.category}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="p-5 flex flex-col flex-1">
+                      <div className="flex items-center gap-1.5 text-xs text-neutral-400 mb-2">
+                        <MapPin className="w-3.5 h-3.5" />
+                        <span>{project.region ? `${project.region}, ` : ""}{project.country}</span>
+                        <span className="mx-1">·</span>
+                        <Users className="w-3.5 h-3.5" />
+                        <span>{project.beneficiaries.toLocaleString("fr-FR")} beneficiaires</span>
+                      </div>
+                      <h2 className="font-heading font-bold text-neutral-900 text-base leading-snug group-hover:text-primary-600 transition-colors mb-2">
+                        {project.title}
+                      </h2>
+                      <p className="text-neutral-500 text-sm leading-relaxed line-clamp-2 mb-4 flex-1">
+                        {project.shortDescription}
+                      </p>
+                      <div className="mt-auto">
+                        <div className="flex justify-between text-xs mb-1.5">
+                          <span className="font-bold text-neutral-700">{formatCurrency(project.raisedAmount)}</span>
+                          <span className="text-neutral-400">{progress}%</span>
+                        </div>
+                        <div className="h-2 bg-neutral-100 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full rounded-full ${project.status === "urgent" ? "bg-gradient-to-r from-red-500 to-orange-500" : "bg-gradient-to-r from-primary-500 to-secondary-500"}`}
+                            style={{ width: `${progress}%` }}
+                          />
+                        </div>
+                        <p className="text-xs text-neutral-400 mt-1">sur {formatCurrency(project.goalAmount)}</p>
+                      </div>
+                    </div>
                   </Link>
-                </div>
-
-                {project.objectives && project.objectives.length > 0 && (
-                  <div className="bg-white rounded-2xl p-6 border border-neutral-100">
-                    <h3 className="font-heading font-bold text-neutral-900 mb-4 flex items-center gap-2">
-                      <Target className="w-4 h-4 text-primary-600" />Objectifs
-                    </h3>
-                    <ul className="space-y-2">
-                      {project.objectives.slice(0, 5).map((obj, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-neutral-600">
-                          <div className="w-4 h-4 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <span className="text-primary-600 font-bold text-[10px]">{i + 1}</span>
-                          </div>
-                          {obj}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                <div className="bg-white rounded-2xl p-5 border border-neutral-100">
-                  <div className="flex items-center gap-2 text-xs text-neutral-400 flex-col text-center gap-3">
-                    <div className="flex items-center gap-1"><Shield className="w-3.5 h-3.5 text-secondary-500" />Paiement securise</div>
-                    <div className="flex items-center gap-1"><FileText className="w-3.5 h-3.5 text-secondary-500" />Recu fiscal automatique</div>
-                    <div className="flex items-center gap-1"><TrendingUp className="w-3.5 h-3.5 text-secondary-500" />98% sur le terrain</div>
-                  </div>
-                </div>
-              </div>
+                );
+              })}
             </div>
-          </div>
+          )}
 
-          <div className="mt-16 bg-gradient-to-br from-primary-900 to-primary-950 rounded-2xl p-8 md:p-12 text-center">
-            <h3 className="font-heading font-bold text-white text-2xl md:text-3xl mb-3">Aidez-nous a terminer ce projet</h3>
-            <p className="text-white/70 mb-8 max-w-xl mx-auto">Chaque contribution rapproche des familles d un meilleur acces a la sante, a l education et a des conditions de vie dignes.</p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/don" className="inline-flex items-center justify-center gap-2 bg-secondary-600 hover:bg-secondary-500 text-white font-bold px-10 py-4 rounded-2xl transition-all hover:-translate-y-1 shadow-lg text-lg">
-                <Heart className="w-5 h-5 fill-white" />Faire un don
-              </Link>
-              <Link href="/projets" className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white font-semibold px-10 py-4 rounded-2xl transition-all border border-white/20 text-lg">
-                <ArrowLeft className="w-5 h-5" />Voir tous les projets
-              </Link>
-            </div>
+          <div className="mt-16 bg-gradient-to-br from-primary-900 to-primary-950 rounded-3xl p-8 md:p-12 text-center">
+            <h2 className="font-heading font-bold text-white text-2xl md:text-3xl mb-3">Soutenez nos projets</h2>
+            <p className="text-white/70 mb-6 max-w-lg mx-auto">
+              Votre don, quelle que soit sa valeur, a un impact direct sur les communautes que nous servons.
+            </p>
+            <Link href="/don" className="inline-flex items-center gap-2 bg-secondary-600 hover:bg-secondary-500 text-white px-8 py-3 rounded-full font-bold transition-colors">
+              <Heart className="w-4 h-4 fill-white" />Faire un don
+            </Link>
           </div>
         </div>
       </section>
