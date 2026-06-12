@@ -13,7 +13,7 @@ const STATUS_CONFIG = {
   urgent: { label: "Urgent", color: "bg-red-100 text-red-700", icon: AlertTriangle },
   "en-cours": { label: "En cours", color: "bg-secondary-100 text-secondary-700", icon: Clock },
   termine: { label: "Termine", color: "bg-neutral-100 text-neutral-600", icon: CheckCircle },
-  nouveau: { label: "Nouveau", color: "bg-primary-100 text-primary-700", icon: Sparkles },
+  nouveau: { label: "En cours", color: "bg-secondary-100 text-secondary-700", icon: Sparkles },
 } as const;
 
 const CAT_LABELS: Record<string, string> = {
@@ -55,7 +55,7 @@ export default async function ProjetsPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {projects.map((project) => {
-                const status = STATUS_CONFIG[project.status] || STATUS_CONFIG["en-cours"];
+                const status = STATUS_CONFIG[project.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG["nouveau"];
                 const StatusIcon = status.icon;
                 const progress = project.goalAmount > 0
                   ? Math.min(Math.round((project.raisedAmount / project.goalAmount) * 100), 100)
@@ -107,7 +107,7 @@ export default async function ProjetsPage() {
                         </div>
                         <div className="h-2 bg-neutral-100 rounded-full overflow-hidden">
                           <div
-                            className={`h-full rounded-full ${project.status === "urgent" ? "bg-gradient-to-r from-red-500 to-orange-500" : "bg-gradient-to-r from-primary-500 to-secondary-500"}`}
+                            className="h-full rounded-full bg-gradient-to-r from-primary-500 to-secondary-500"
                             style={{ width: `${progress}%` }}
                           />
                         </div>
