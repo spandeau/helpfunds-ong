@@ -1,4 +1,8 @@
-const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+const STRAPI_URL =
+  process.env.STRAPI_URL ||
+  process.env.NEXT_PUBLIC_STRAPI_URL ||
+  "http://localhost:1337";
+
 const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN || "";
 
 export interface StrapiResponse<T> {
@@ -45,6 +49,7 @@ export class StrapiClient {
   ): Promise<T | null> {
     try {
       const url = `${this.baseUrl}/api${endpoint}`;
+      console.log(`[Strapi] Fetching: ${url}`);
       const response = await fetch(url, {
         ...options,
         headers: {
@@ -55,9 +60,6 @@ export class StrapiClient {
       });
 
       if (!response.ok) {
-        if (response.status === 404) {
-          return null;
-        }
         console.warn(`[Strapi] Erreur ${response.status} pour ${endpoint}`);
         return null;
       }
