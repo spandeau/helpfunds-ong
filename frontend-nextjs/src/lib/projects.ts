@@ -34,7 +34,7 @@ interface StrapiProject {
 
 function toUrl(url?: string): string {
   if (!url) return "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=1200&q=80";
-  const BASE = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+  const BASE = process.env.STRAPI_URL || process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
   return url.startsWith("http") ? url : `${BASE}${url}`;
 }
 
@@ -48,7 +48,7 @@ function strapiProjectToProject(p: StrapiProject): Project {
     category: p.category || "sante",
     country: p.country || "",
     region: p.region || "",
-    status: p.status || "en-cours",
+    status: p.status || "nouveau",
     featured: p.featured || false,
     goalAmount: p.goalAmount || 0,
     raisedAmount: p.raisedAmount || 0,
@@ -82,7 +82,7 @@ export async function getAllProjects(): Promise<Project[]> {
       return result.data.map(strapiProjectToProject);
     }
   } catch (error) {
-    console.warn("[Projects] Fallback projects-data utilise", error);
+    console.warn("[Projects] Fallback utilise", error);
   }
   return PROJECTS;
 }
@@ -110,7 +110,7 @@ export async function getFeaturedProjects(): Promise<Project[]> {
       return result.data.map(strapiProjectToProject);
     }
   } catch (error) {
-    console.warn("[Projects] Fallback featured projects", error);
+    console.warn("[Projects] Fallback featured", error);
   }
   return PROJECTS.filter((p) => p.featured);
 }
