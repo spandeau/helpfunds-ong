@@ -17,16 +17,25 @@ interface TeamMember {
   twitter?: string;
   order: number;
   department?: string;
+  active?: boolean;
   photo?: { url: string };
 }
 
+const DEPT_LABELS: Record<string, string> = {
+  direction: "Direction",
+  terrain: "Terrain",
+  communication: "Communication",
+  finance: "Finance",
+  technique: "Technique",
+};
+
 const FALLBACK_MEMBERS: TeamMember[] = [
-  { id: 1, name: "Marie Kofi", role: "Directrice Generale", bio: "Pionniere du developpement durable en Afrique de l Ouest avec plus de 15 ans d experience.", email: "helpfunds17@gmail.com", linkedin: "https://linkedin.com", order: 1, department: "Direction" },
-  { id: 2, name: "Jean-Baptiste Mensah", role: "Directeur des Operations", bio: "Expert en logistique humanitaire et coordination de projets multi-pays.", email: "helpfunds17@gmail.com", linkedin: "https://linkedin.com", order: 2, department: "Direction" },
-  { id: 3, name: "Amina Diallo", role: "Responsable Communication", bio: "Specialiste en communication digitale et fundraising.", email: "helpfunds17@gmail.com", linkedin: "https://linkedin.com", twitter: "https://twitter.com", order: 3, department: "Communication" },
-  { id: 4, name: "Samuel Tetteh", role: "Responsable Financier", bio: "Comptable certifie avec une expertise en gestion de fonds pour organisations a but non lucratif.", email: "helpfunds17@gmail.com", linkedin: "https://linkedin.com", order: 4, department: "Finance" },
-  { id: 5, name: "Fatou Diarra", role: "Coordinatrice Terrain", bio: "Coordinatrice de projets humanitaires en zones rurales depuis 8 ans.", email: "helpfunds17@gmail.com", order: 5, department: "Terrain" },
-  { id: 6, name: "Kwame Asante", role: "Responsable Technique", bio: "Ingenieur specialise dans les infrastructures d eau et d assainissement.", email: "helpfunds17@gmail.com", linkedin: "https://linkedin.com", order: 6, department: "Technique" },
+  { id: 1, name: "Marie Kofi", role: "Directrice Generale", bio: "Pionniere du developpement durable en Afrique de l Ouest avec plus de 15 ans d experience.", email: "helpfunds17@gmail.com", linkedin: "https://linkedin.com", order: 1, department: "direction" },
+  { id: 2, name: "Jean-Baptiste Mensah", role: "Directeur des Operations", bio: "Expert en logistique humanitaire et coordination de projets multi-pays.", email: "helpfunds17@gmail.com", linkedin: "https://linkedin.com", order: 2, department: "direction" },
+  { id: 3, name: "Amina Diallo", role: "Responsable Communication", bio: "Specialiste en communication digitale et fundraising.", email: "helpfunds17@gmail.com", linkedin: "https://linkedin.com", twitter: "https://twitter.com", order: 3, department: "communication" },
+  { id: 4, name: "Samuel Tetteh", role: "Responsable Financier", bio: "Comptable certifie avec une expertise en gestion de fonds pour organisations a but non lucratif.", email: "helpfunds17@gmail.com", linkedin: "https://linkedin.com", order: 4, department: "finance" },
+  { id: 5, name: "Fatou Diarra", role: "Coordinatrice Terrain", bio: "Coordinatrice de projets humanitaires en zones rurales depuis 8 ans.", email: "helpfunds17@gmail.com", order: 5, department: "terrain" },
+  { id: 6, name: "Kwame Asante", role: "Responsable Technique", bio: "Ingenieur specialise dans les infrastructures d eau et d assainissement.", email: "helpfunds17@gmail.com", linkedin: "https://linkedin.com", order: 6, department: "technique" },
 ];
 
 async function getTeamMembers(): Promise<TeamMember[]> {
@@ -34,7 +43,9 @@ async function getTeamMembers(): Promise<TeamMember[]> {
     const result = await strapiClient.fetch<{ data: TeamMember[] }>(
       "/team-members?populate[photo]=true&sort=order:asc&pagination[pageSize]=50"
     );
-    if (result?.data && result.data.length > 0) return result.data;
+    if (result?.data && result.data.length > 0) {
+      return result.data.filter((m) => m.active !== false);
+    }
   } catch (error) {
     console.warn("[Equipe] Fallback utilise", error);
   }
@@ -63,20 +74,16 @@ function MemberCard({ member, strapiUrl }: { member: TeamMember; strapiUrl: stri
           </div>
         )}
       </div>
-
       <h3 className="font-heading font-bold text-neutral-900">{member.name}</h3>
       <p className="text-primary-600 text-sm font-medium mt-1">{member.role}</p>
-
       {member.department && (
         <span className="inline-block mt-2 text-xs bg-neutral-100 text-neutral-500 px-2.5 py-0.5 rounded-full">
-          {member.department}
+          {DEPT_LABELS[member.department] || member.department}
         </span>
       )}
-
       {member.bio && (
         <p className="mt-3 text-neutral-400 text-xs leading-relaxed line-clamp-3">{member.bio}</p>
       )}
-
       <div className="mt-4 flex items-center justify-center gap-3 text-xs font-medium">
         {member.linkedin && (
           <a href={member.linkedin} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
@@ -100,7 +107,7 @@ function MemberCard({ member, strapiUrl }: { member: TeamMember; strapiUrl: stri
 
 export default async function EquipePage() {
   const members = await getTeamMembers();
-  const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+  const STRAPI_URL = process.env.STRAPI_URL || process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
 
   return (
     <main className="min-h-screen bg-neutral-50">
