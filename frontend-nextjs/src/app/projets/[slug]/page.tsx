@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -30,7 +30,7 @@ const STATUS_CONFIG = {
   urgent: { label: "Urgent", color: "bg-red-100 text-red-700", icon: AlertTriangle },
   "en-cours": { label: "En cours", color: "bg-secondary-100 text-secondary-700", icon: Clock },
   termine: { label: "Termine", color: "bg-neutral-100 text-neutral-600", icon: CheckCircle },
-  nouveau: { label: "Nouveau", color: "bg-primary-100 text-primary-700", icon: Sparkles },
+  nouveau: { label: "En cours", color: "bg-secondary-100 text-secondary-700", icon: Sparkles },
 };
 
 const CAT_LABELS: Record<string, string> = {
@@ -52,7 +52,7 @@ export default async function ProjetDetailPage(
 
   const progress = Math.min(Math.round((project.raisedAmount / project.goalAmount) * 100), 100);
   const remaining = project.goalAmount - project.raisedAmount;
-  const status = STATUS_CONFIG[project.status] || STATUS_CONFIG["en-cours"];
+  const status = STATUS_CONFIG[project.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG["nouveau"];
   const StatusIcon = status.icon;
   const relatedProjects = PROJECTS.filter((p) => p.slug !== slug && p.category === project.category).slice(0, 3);
 
@@ -134,29 +134,6 @@ export default async function ProjetDetailPage(
                 </div>
               )}
 
-              {project.remaining && project.remaining.length > 0 && (
-                <div className="bg-white rounded-2xl p-6 border border-neutral-100">
-                  <h2 className="font-heading font-bold text-neutral-900 text-xl mb-5 flex items-center gap-2">
-                    <Target className="w-5 h-5 text-primary-600" />Ce qu il reste a accomplir
-                  </h2>
-                  <div className="space-y-3 mb-5">
-                    {project.remaining.map((item, i) => (
-                      <div key={i} className="flex items-start gap-3">
-                        <div className="w-6 h-6 bg-neutral-100 border-2 border-dashed border-neutral-300 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <span className="text-neutral-400 font-bold text-xs">{i + 1}</span>
-                        </div>
-                        <span className="text-neutral-600 text-sm">{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                  {project.status !== "termine" && (
-                    <Link href="/don" className="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-all">
-                      <Heart className="w-4 h-4 fill-white" />Aider a completer ce projet
-                    </Link>
-                  )}
-                </div>
-              )}
-
               {project.images.length > 1 && (
                 <div className="bg-white rounded-2xl p-6 border border-neutral-100">
                   <h2 className="font-heading font-bold text-neutral-900 text-xl mb-4">Galerie du projet</h2>
@@ -164,45 +141,6 @@ export default async function ProjetDetailPage(
                     {project.images.map((img, i) => (
                       <div key={i} className="relative h-32 rounded-xl overflow-hidden">
                         <Image src={img} alt={`Photo ${i + 1}`} fill className="object-cover hover:scale-105 transition-transform duration-300" sizes="(max-width: 640px) 50vw, 33vw" />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {project.budgetBreakdown && project.budgetBreakdown.length > 0 && (
-                <div className="bg-white rounded-2xl p-6 border border-neutral-100">
-                  <h2 className="font-heading font-bold text-neutral-900 text-xl mb-5">Utilisation des dons</h2>
-                  <div className="space-y-3">
-                    {project.budgetBreakdown.map((item) => (
-                      <div key={item.label}>
-                        <div className="flex justify-between items-center mb-1.5">
-                          <span className="text-sm font-medium text-neutral-700">{item.label}</span>
-                          <span className="text-sm font-bold text-neutral-900">{item.percentage}%</span>
-                        </div>
-                        <div className="h-2.5 bg-neutral-100 rounded-full overflow-hidden">
-                          <div className="h-full rounded-full transition-all duration-700" style={{ width: `${item.percentage}%`, backgroundColor: item.color }} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {project.testimonials && project.testimonials.length > 0 && (
-                <div className="bg-white rounded-2xl p-6 border border-neutral-100">
-                  <h2 className="font-heading font-bold text-neutral-900 text-xl mb-5">Temoignages</h2>
-                  <div className="space-y-5">
-                    {project.testimonials.map((t, i) => (
-                      <div key={i} className="bg-neutral-50 rounded-2xl p-5 border border-neutral-100">
-                        <p className="text-neutral-600 italic mb-4 leading-relaxed">&ldquo;{t.text}&rdquo;</p>
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center text-white font-bold text-sm">{t.avatar}</div>
-                          <div>
-                            <div className="font-semibold text-neutral-900 text-sm">{t.name}</div>
-                            <div className="text-xs text-neutral-400">{t.role}</div>
-                          </div>
-                        </div>
                       </div>
                     ))}
                   </div>
@@ -238,7 +176,7 @@ export default async function ProjetDetailPage(
                   <div className="text-sm text-neutral-400 mb-3">collectes sur {formatCurrency(project.goalAmount)}</div>
                   <div className="h-3 bg-neutral-100 rounded-full overflow-hidden mb-2">
                     <div
-                      className={`h-full rounded-full ${progress === 100 ? "bg-secondary-500" : project.status === "urgent" ? "bg-gradient-to-r from-red-500 to-orange-500" : "bg-gradient-to-r from-primary-500 to-secondary-500"}`}
+                      className="h-full rounded-full bg-gradient-to-r from-primary-500 to-secondary-500"
                       style={{ width: `${progress}%` }}
                     />
                   </div>
