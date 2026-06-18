@@ -1,0 +1,20 @@
+[33m59e1f34[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m HEAD@{Sun Jun 14 12:58:12 2026}: commit: feat: barre recherche actualites, equipe connectee Strapi
+[33m8c49cf3[m HEAD@{Sat Jun 13 10:38:27 2026}: commit: fix: projects.ts utilise STRAPI_URL server-side
+[33mbc15549[m HEAD@{Fri Jun 12 23:39:41 2026}: commit: fix: status nouveau traite comme en-cours dans projets
+[33mbb3f0ea[m HEAD@{Fri Jun 12 23:02:25 2026}: commit: fix: articles supprime populate images qui cause 400
+[33md2d6993[m HEAD@{Fri Jun 12 22:52:44 2026}: commit: fix: strapi CORS ouvert pour tous les domaines
+[33m756058d[m HEAD@{Fri Jun 12 22:47:52 2026}: commit: chore: rebuild pour charger donnees Strapi
+[33m84c5046[m HEAD@{Fri Jun 12 22:38:55 2026}: commit: fix: strapi client utilise STRAPI_URL server-side
+[33md91922c[m HEAD@{Fri Jun 12 22:32:01 2026}: commit: chore: force redeploy Vercel pour vider le cache
+[33me37115b[m HEAD@{Fri Jun 12 22:14:45 2026}: commit: fix: railway build avec npm install avant strapi build
+[33me3303d7[m HEAD@{Fri Jun 12 12:43:46 2026}: commit: fix: railway supprime healthcheck, port explicite
+[33mf7183a5[m HEAD@{Fri Jun 12 12:27:01 2026}: commit: fix: railway healthcheck timeout augmente a 600s
+[33m7c9c922[m HEAD@{Fri Jun 12 11:15:03 2026}: commit: fix: railway build strapi admin avant start
+[33m140fe7d[m HEAD@{Fri Jun 12 10:44:45 2026}: commit: fix: strapi CORS configure pour Vercel + server public URL
+[33m07c8194[m HEAD@{Fri Jun 12 10:39:14 2026}: commit: fix: equipe page.tsx - fichier propre sans corruption
+[33mad09a3e[m HEAD@{Thu Jun 11 20:59:33 2026}: commit: fix: populate v5, pages liste/detail actualites projets, equipe, Railway config
+[33m61dd2a0[m HEAD@{Tue Jun 9 21:54:27 2026}: commit: feat: audit liens - ActionsSection, detail projet, detail article tous fonctionnels
+[33m9700764[m HEAD@{Tue Jun 9 20:55:24 2026}: commit: feat: favicon + SEO layout + BackButton + page rapports annuels
+[33m323a024[m HEAD@{Tue Jun 9 19:55:25 2026}: commit: fix: footer avec vrais logos SVG via PowerShell
+[33md2b566a[m HEAD@{Tue Jun 9 19:48:53 2026}: commit: trigger: redeploy avec nouvelle URL Strapi Railway
+[33ma01ae50[m HEAD@{Tue Jun 9 19:48:33 2026}: commit: trigger: redeploy avec nouvelle URL Strapi Railway
