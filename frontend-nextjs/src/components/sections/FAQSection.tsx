@@ -1,59 +1,56 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ChevronDown, Heart, Users, FileText, Globe } from "lucide-react";
 
-const FAQS = [
-  {
-    question: "Comment puis-je etre sur que mon don est bien utilise ?",
-    answer: "Help Funds publie chaque annee un rapport financier complet et detaille. 98% de chaque don va directement sur le terrain. Nos comptes sont audites par un cabinet independant et disponibles publiquement sur notre site.",
-  },
-  {
-    question: "Mon don est-il deductible des impots ?",
-    answer: "Oui. En tant qu ONG reconnue d utilite publique, vos dons ouvrent droit a une reduction d impot de 66% du montant donne (dans la limite de 20% du revenu imposable). Un recu fiscal vous est envoye automatiquement par email apres chaque don.",
-  },
-  {
-    question: "Puis-je choisir a quel projet mon don est affecte ?",
-    answer: "Absolument. Lors de votre don, vous pouvez choisir d affecter votre contribution a un projet specifique (education, eau potable, sante, logement) ou laisser Help Funds l allouer la ou le besoin est le plus urgent.",
-  },
-  {
-    question: "Comment fonctionne le don mensuel ?",
-    answer: "Le don mensuel est preleve automatiquement chaque mois sur votre carte bancaire. Vous pouvez modifier ou annuler votre don mensuel a tout moment depuis votre espace donateur, sans frais ni justification.",
-  },
-  {
-    question: "Mes donnees bancaires sont-elles securisees ?",
-    answer: "Oui, completement. Nous utilisons Stripe, le leader mondial du paiement en ligne, avec un chiffrement SSL 256 bits. Vos coordonnees bancaires ne sont jamais stockees sur nos serveurs.",
-  },
-  {
-    question: "Puis-je faire un don au nom d une entreprise ?",
-    answer: "Oui. Help Funds propose des partenariats entreprises avec des avantages specifiques (recu fiscal, visibilite, rapports d impact). Contactez-nous directement pour discuter des modalites.",
-  },
-  {
-    question: "Comment devenir benevole ou partenaire ?",
-    answer: "Nous accueillons regulierement des benevoles et partenaires. Rendez-vous sur notre page Benevole pour decouvrir les opportunites disponibles ou contactez-nous directement.",
-  },
-  {
-    question: "Dans quels pays intervenez-vous ?",
-    answer: "Help Funds intervient dans 35 pays principalement en Afrique subsaharienne, en Asie du Sud-Est et en Amerique latine. Chaque intervention est faite en partenariat avec des acteurs locaux pour garantir un impact durable.",
-  },
+interface FAQ {
+  id: number;
+  question: string;
+  answer: string;
+  order: number;
+  active: boolean;
+  category?: string;
+}
+
+const FALLBACK_FAQS: FAQ[] = [
+  { id: 1, question: "Comment puis-je etre sur que mon don est bien utilise ?", answer: "Help Funds publie chaque annee un rapport financier complet et detaille. 98% de chaque don va directement sur le terrain. Nos comptes sont audites par un cabinet independant et disponibles publiquement sur notre site.", order: 1, active: true },
+  { id: 2, question: "Mon don est-il deductible des impots ?", answer: "Oui. En tant qu ONG reconnue d utilite publique, vos dons ouvrent droit a une reduction d impot de 66% du montant donne (dans la limite de 20% du revenu imposable). Un recu fiscal vous est envoye automatiquement par email apres chaque don.", order: 2, active: true },
+  { id: 3, question: "Puis-je choisir a quel projet mon don est affecte ?", answer: "Absolument. Lors de votre don, vous pouvez choisir d affecter votre contribution a un projet specifique (education, eau potable, sante, logement) ou laisser Help Funds l allouer la ou le besoin est le plus urgent.", order: 3, active: true },
+  { id: 4, question: "Comment fonctionne le don mensuel ?", answer: "Le don mensuel est preleve automatiquement chaque mois sur votre carte bancaire. Vous pouvez modifier ou annuler votre don mensuel a tout moment depuis votre espace donateur, sans frais ni justification.", order: 4, active: true },
+  { id: 5, question: "Mes donnees bancaires sont-elles securisees ?", answer: "Oui, completement. Nous utilisons Stripe, le leader mondial du paiement en ligne, avec un chiffrement SSL 256 bits. Vos coordonnees bancaires ne sont jamais stockees sur nos serveurs.", order: 5, active: true },
+  { id: 6, question: "Puis-je faire un don au nom d une entreprise ?", answer: "Oui. Help Funds propose des partenariats entreprises avec des avantages specifiques (recu fiscal, visibilite, rapports d impact). Contactez-nous directement pour discuter des modalites.", order: 6, active: true },
+  { id: 7, question: "Comment devenir benevole ou partenaire ?", answer: "Nous accueillons regulierement des benevoles et partenaires. Rendez-vous sur notre page Benevole pour decouvrir les opportunites disponibles ou contactez-nous directement.", order: 7, active: true },
+  { id: 8, question: "Dans quels pays intervenez-vous ?", answer: "Help Funds intervient dans 35 pays principalement en Afrique subsaharienne, en Asie du Sud-Est et en Amerique latine. Chaque intervention est faite en partenariat avec des acteurs locaux pour garantir un impact durable.", order: 8, active: true },
 ];
 
 const QUICK_LINKS = [
   { icon: Heart, label: "Faire un don", href: "/don", color: "bg-secondary-50 text-secondary-600 border-secondary-100" },
-  { icon: Users, label: "Devenir benevole", href: "/benevole", color: "bg-primary-50 text-primary-600 border-primary-100" },
+  { icon: Users, label: "Devenir benevole", href: "/contact", color: "bg-primary-50 text-primary-600 border-primary-100" },
   { icon: FileText, label: "Rapports annuels", href: "/rapports", color: "bg-neutral-50 text-neutral-600 border-neutral-200" },
   { icon: Globe, label: "Nos projets", href: "/projets", color: "bg-secondary-50 text-secondary-600 border-secondary-100" },
 ];
 
 export default function FAQSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const [faqs, setFaqs] = useState<FAQ[]>(FALLBACK_FAQS);
+
+  useEffect(() => {
+    const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+    fetch(`${STRAPI_URL}/api/faqs?filters[active][$eq]=true&sort=order:asc&pagination[pageSize]=20`)
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        if (data?.data && data.data.length > 0) {
+          setFaqs(data.data);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <section className="bg-white py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {/* Header */}
         <div className="text-center mb-14">
           <p className="text-primary-600 font-semibold text-sm uppercase tracking-widest mb-3">
             Questions frequentes
@@ -69,11 +66,10 @@ export default function FAQSection() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
 
-          {/* FAQ Liste */}
           <div className="lg:col-span-2 space-y-3">
-            {FAQS.map((faq, index) => (
+            {faqs.map((faq, index) => (
               <div
-                key={index}
+                key={faq.id}
                 className="border border-neutral-200 rounded-2xl overflow-hidden hover:border-primary-200 transition-colors"
               >
                 <button
@@ -99,7 +95,6 @@ export default function FAQSection() {
               </div>
             ))}
 
-            {/* Contact CTA */}
             <div className="bg-primary-50 border border-primary-100 rounded-2xl p-6 mt-6">
               <p className="font-semibold text-primary-900 mb-1">
                 Vous ne trouvez pas votre reponse ?
@@ -116,14 +111,9 @@ export default function FAQSection() {
             </div>
           </div>
 
-          {/* Sidebar */}
           <div className="lg:col-span-1 space-y-6">
-
-            {/* Liens rapides */}
             <div className="bg-neutral-50 rounded-2xl p-6 border border-neutral-100">
-              <h3 className="font-heading font-bold text-neutral-900 mb-4">
-                Liens rapides
-              </h3>
+              <h3 className="font-heading font-bold text-neutral-900 mb-4">Liens rapides</h3>
               <div className="space-y-3">
                 {QUICK_LINKS.map(({ icon: Icon, label, href, color }) => (
                   <Link
@@ -138,11 +128,8 @@ export default function FAQSection() {
               </div>
             </div>
 
-            {/* Stats confiance */}
             <div className="bg-gradient-to-br from-primary-900 to-primary-950 rounded-2xl p-6 text-white">
-              <h3 className="font-heading font-bold mb-4">
-                Ils nous font confiance
-              </h3>
+              <h3 className="font-heading font-bold mb-4">Ils nous font confiance</h3>
               <div className="space-y-4">
                 {[
                   { value: "50 000+", label: "beneficiaires aides" },
@@ -166,11 +153,8 @@ export default function FAQSection() {
               </div>
             </div>
 
-            {/* Newsletter */}
             <div className="bg-neutral-50 rounded-2xl p-6 border border-neutral-100">
-              <h3 className="font-heading font-bold text-neutral-900 mb-2">
-                Restez informe
-              </h3>
+              <h3 className="font-heading font-bold text-neutral-900 mb-2">Restez informe</h3>
               <p className="text-neutral-500 text-sm mb-4">
                 Recevez nos actualites et rapports d impact directement dans votre boite mail.
               </p>
