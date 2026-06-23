@@ -1,26 +1,52 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, Heart, ChevronDown } from "lucide-react";
 import { NAV_LINKS } from "@/constants";
 import Logo from "@/components/ui/Logo";
 
-// Pages avec hero image sombre → navbar transparente au debut
 const DARK_HERO_PAGES = ["/"];
+const DROPDOWN_TIMEOUT = 5000; // 5 secondes
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const pathname = usePathname();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const hasDarkHero = DARK_HERO_PAGES.includes(pathname);
-
-  // Sur pages sans hero sombre → toujours fond blanc
-  // Sur page d accueil → transparent jusqu au scroll
   const isTransparent = hasDarkHero && !scrolled;
+
+  // Fermer dropdown apres 5s d inactivite
+  const startCloseTimer = useCallback(() => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      setActiveDropdown(null);
+    }, DROPDOWN_TIMEOUT);
+  }, []);
+
+  const cancelCloseTimer = useCallback(() => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+  }, []);
+
+  const openDropdown = useCallback((label: string) => {
+    cancelCloseTimer();
+    setActiveDropdown((prev) => {
+      const next = prev === label ? null : label;
+      if (next) startCloseTimer();
+      return next;
+    });
+  }, [cancelCloseTimer, startCloseTimer]);
+
+  // Nettoyer le timer au unmount
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 30);
@@ -28,17 +54,24 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Fermer dropdown quand on clique ailleurs
+  // Fermer dropdown au clic en dehors
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       if (!target.closest("[data-dropdown]")) {
         setActiveDropdown(null);
+        cancelCloseTimer();
       }
     };
     document.addEventListener("click", handleClick);
     return () => document.removeEventListener("click", handleClick);
-  }, []);
+  }, [cancelCloseTimer]);
+
+  // Fermer dropdown au changement de page
+  useEffect(() => {
+    setActiveDropdown(null);
+    cancelCloseTimer();
+  }, [pathname, cancelCloseTimer]);
 
   return (
     <header
@@ -55,11 +88,25 @@ export default function Navbar() {
 
           <nav className="hidden lg:flex items-center gap-1">
             {NAV_LINKS.map((link) => (
-              <div key={link.label} className="relative group" data-dropdown>
+              <div
+                key={link.label}
+                className="relative"
+                data-dropdown
+                onMouseEnter={() => {
+                  if (link.children) {
+                    cancelCloseTimer();
+                  }
+                }}
+                onMouseLeave={() => {
+                  if (link.children && activeDropdown === link.label) {
+                    startCloseTimer();
+                  }
+                }}
+              >
                 {link.children ? (
                   <>
                     <button
-                      onClick={() => setActiveDropdown(activeDropdown === link.label ? null : link.label)}
+                      onClick={() => openDropdown(link.label)}
                       className={`flex items-center gap-1 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                         isTransparent
                           ? "text-white/90 hover:bg-white/10 hover:text-white"
@@ -67,15 +114,22 @@ export default function Navbar() {
                       }`}
                     >
                       {link.label}
-                      <ChevronDown className={`w-4 h-4 transition-transform ${activeDropdown === link.label ? "rotate-180" : ""}`} />
+                      <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${activeDropdown === link.label ? "rotate-180" : ""}`} />
                     </button>
                     {activeDropdown === link.label && (
-                      <div className="absolute top-full left-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-neutral-100 py-2 z-50">
+                      <div
+                        className="absolute top-full left-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-neutral-100 py-2 z-50"
+                        onMouseEnter={cancelCloseTimer}
+                        onMouseLeave={startCloseTimer}
+                      >
                         {link.children.map((child) => (
                           <Link
                             key={child.label}
                             href={child.href}
-                            onClick={() => setActiveDropdown(null)}
+                            onClick={() => {
+                              setActiveDropdown(null);
+                              cancelCloseTimer();
+                            }}
                             className="block px-4 py-2.5 text-sm text-neutral-700 hover:bg-primary-50 hover:text-primary-600 transition-colors"
                           >
                             {child.label}
