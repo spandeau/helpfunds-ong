@@ -1,9 +1,19 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Users, FolderOpen, Globe, Heart } from "lucide-react";
 import Container from "@/components/layout/Container";
 import { HOME_STATS } from "@/constants";
+
+interface StrapiStat {
+  id: number;
+  value: string;
+  label: string;
+  description?: string;
+  icon?: string;
+  order?: number;
+}
 
 const iconMap: Record<string, React.ElementType> = {
   users: Users,
@@ -20,10 +30,28 @@ const colorMap: Record<number, { bg: string; text: string; border: string }> = {
 };
 
 export default function StatsSection() {
+  const [stats, setStats] = useState(HOME_STATS);
+
+  useEffect(() => {
+    const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+    fetch(`${STRAPI_URL}/api/impact-stats?sort=order:asc&pagination[pageSize]=8`)
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        if (data?.data && data.data.length > 0) {
+          setStats(data.data.map((s: StrapiStat) => ({
+            value: s.value,
+            label: s.label,
+            description: s.description || "",
+            icon: s.icon || "heart",
+          })));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <section className="py-20 md:py-28 bg-neutral-50">
       <Container>
-        {/* Header */}
         <div className="text-center mb-16">
           <motion.p
             initial={{ opacity: 0, y: 10 }}
@@ -40,7 +68,7 @@ export default function StatsSection() {
             transition={{ delay: 0.1 }}
             className="section-title"
           >
-            Des résultats concrets sur le terrain
+            Des resultats concrets sur le terrain
           </motion.h2>
           <div className="divider" />
           <motion.p
@@ -50,14 +78,13 @@ export default function StatsSection() {
             transition={{ delay: 0.2 }}
             className="section-subtitle mx-auto"
           >
-            Chaque euro donné est tracé, audité et utilisé directement
-            pour maximiser l&apos;impact sur les communautés que nous soutenons.
+            Chaque euro donne est trace, audite et utilise directement
+            pour maximiser l&apos;impact sur les communautes que nous soutenons.
           </motion.p>
         </div>
 
-        {/* Grid stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {HOME_STATS.map((stat, index) => {
+          {stats.map((stat, index) => {
             const Icon = iconMap[stat.icon] || Heart;
             const colors = colorMap[index] || colorMap[0];
             return (
@@ -86,7 +113,6 @@ export default function StatsSection() {
           })}
         </div>
 
-        {/* Barre de confiance */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -95,10 +121,10 @@ export default function StatsSection() {
           className="mt-16 bg-white rounded-2xl border border-neutral-100 p-6 flex flex-wrap justify-center gap-8 text-sm"
         >
           {[
-            { icon: "✅", text: "Comptes audités annuellement" },
-            { icon: "🔒", text: "Dons 100% sécurisés" },
+            { icon: "✅", text: "Comptes audites annuellement" },
+            { icon: "🔒", text: "Dons 100% securises" },
             { icon: "📋", text: "Rapports publics disponibles" },
-            { icon: "🏆", text: "Certifiée organisme d'utilité publique" },
+            { icon: "🏆", text: "Certifiee organisme d utilite publique" },
           ].map((item) => (
             <div key={item.text} className="flex items-center gap-2 text-neutral-600">
               <span>{item.icon}</span>

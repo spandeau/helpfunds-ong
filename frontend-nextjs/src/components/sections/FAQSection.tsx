@@ -14,14 +14,14 @@ interface FAQ {
 }
 
 const FALLBACK_FAQS: FAQ[] = [
-  { id: 1, question: "Comment puis-je etre sur que mon don est bien utilise ?", answer: "Help Funds publie chaque annee un rapport financier complet et detaille. 98% de chaque don va directement sur le terrain. Nos comptes sont audites par un cabinet independant et disponibles publiquement sur notre site.", order: 1, active: true },
-  { id: 2, question: "Mon don est-il deductible des impots ?", answer: "Oui. En tant qu ONG reconnue d utilite publique, vos dons ouvrent droit a une reduction d impot de 66% du montant donne (dans la limite de 20% du revenu imposable). Un recu fiscal vous est envoye automatiquement par email apres chaque don.", order: 2, active: true },
-  { id: 3, question: "Puis-je choisir a quel projet mon don est affecte ?", answer: "Absolument. Lors de votre don, vous pouvez choisir d affecter votre contribution a un projet specifique (education, eau potable, sante, logement) ou laisser Help Funds l allouer la ou le besoin est le plus urgent.", order: 3, active: true },
-  { id: 4, question: "Comment fonctionne le don mensuel ?", answer: "Le don mensuel est preleve automatiquement chaque mois sur votre carte bancaire. Vous pouvez modifier ou annuler votre don mensuel a tout moment depuis votre espace donateur, sans frais ni justification.", order: 4, active: true },
-  { id: 5, question: "Mes donnees bancaires sont-elles securisees ?", answer: "Oui, completement. Nous utilisons Stripe, le leader mondial du paiement en ligne, avec un chiffrement SSL 256 bits. Vos coordonnees bancaires ne sont jamais stockees sur nos serveurs.", order: 5, active: true },
-  { id: 6, question: "Puis-je faire un don au nom d une entreprise ?", answer: "Oui. Help Funds propose des partenariats entreprises avec des avantages specifiques (recu fiscal, visibilite, rapports d impact). Contactez-nous directement pour discuter des modalites.", order: 6, active: true },
-  { id: 7, question: "Comment devenir benevole ou partenaire ?", answer: "Nous accueillons regulierement des benevoles et partenaires. Rendez-vous sur notre page Benevole pour decouvrir les opportunites disponibles ou contactez-nous directement.", order: 7, active: true },
-  { id: 8, question: "Dans quels pays intervenez-vous ?", answer: "Help Funds intervient dans 35 pays principalement en Afrique subsaharienne, en Asie du Sud-Est et en Amerique latine. Chaque intervention est faite en partenariat avec des acteurs locaux pour garantir un impact durable.", order: 8, active: true },
+  { id: 1, question: "Comment puis-je etre certain que mon don arrive bien sur le terrain ?", answer: "Help Funds publie chaque annee un rapport financier complet certifie par un auditeur independant. 98% de chaque don va directement financer nos projets humanitaires. Vous recevez egalement un rapport d impact personnalise vous montrant concretement l utilisation de votre contribution.", order: 1, active: true },
+  { id: 2, question: "Mon don est-il deductible des impots ?", answer: "Oui. En tant qu association reconnue d interet general, vos dons ouvrent droit a une reduction d impot de 66% du montant verse dans la limite de 20% de votre revenu imposable. Un recu fiscal officiel vous est envoye automatiquement par email apres chaque don.", order: 2, active: true },
+  { id: 3, question: "Puis-je affecter mon don a un projet specifique ?", answer: "Absolument. Lors de votre don vous pouvez choisir de soutenir un projet precis parmi nos programmes actifs. Vous pouvez egalement laisser Help Funds allouer votre don la ou le besoin est le plus urgent.", order: 3, active: true },
+  { id: 4, question: "Comment fonctionne le don mensuel et puis-je l annuler ?", answer: "Le don mensuel est preleve automatiquement chaque mois. Vous pouvez modifier le montant ou annuler votre engagement a tout moment depuis votre espace donateur en ligne, sans frais ni justification.", order: 4, active: true },
+  { id: 5, question: "Mes donnees personnelles et bancaires sont-elles protegees ?", answer: "Oui. Nous utilisons Stripe, leader mondial du paiement securise, avec un chiffrement SSL 256 bits. Vos coordonnees bancaires ne transitent jamais par nos serveurs.", order: 5, active: true },
+  { id: 6, question: "Est-il possible de faire un don au nom d une entreprise ?", answer: "Oui. Help Funds propose des programmes de partenariat entreprise avec recu fiscal, rapport d impact dedie et visibilite sur nos supports. Contactez-nous pour etudier un partenariat.", order: 6, active: true },
+  { id: 7, question: "Comment rejoindre Help Funds en tant que benevole ?", answer: "Nous recherchons regulierement des benevoles qualifies. Rendez-vous sur notre page Contact pour soumettre votre candidature. Nous revenons vers vous sous 72 heures.", order: 7, active: true },
+  { id: 8, question: "Dans combien de pays Help Funds intervient-elle ?", answer: "Help Funds est active dans 12 pays d Afrique de l Ouest et d Afrique de l Est dont le Togo, le Senegal, le Mali, le Niger, le Ghana, le Benin, le Kenya et l Ethiopie.", order: 8, active: true },
 ];
 
 const QUICK_LINKS = [
@@ -50,7 +50,6 @@ export default function FAQSection() {
   return (
     <section className="bg-white py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
         <div className="text-center mb-14">
           <p className="text-primary-600 font-semibold text-sm uppercase tracking-widest mb-3">
             Questions frequentes
@@ -65,7 +64,6 @@ export default function FAQSection() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-
           <div className="lg:col-span-2 space-y-3">
             {faqs.map((faq, index) => (
               <div
@@ -134,8 +132,8 @@ export default function FAQSection() {
                 {[
                   { value: "50 000+", label: "beneficiaires aides" },
                   { value: "98%", label: "des dons sur le terrain" },
-                  { value: "35", label: "pays d intervention" },
-                  { value: "10 ans", label: "d experience" },
+                  { value: "12", label: "pays d intervention" },
+                  { value: "5 ans", label: "d experience" },
                 ].map((stat) => (
                   <div key={stat.label} className="flex items-center justify-between">
                     <span className="text-white/60 text-sm">{stat.label}</span>
