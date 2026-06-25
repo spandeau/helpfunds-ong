@@ -1,6 +1,10 @@
-﻿import Link from "next/link";
+﻿"use client";
+
+import { useState } from "react";
+import Link from "next/link";
 import { Mail, Phone, MapPin } from "lucide-react";
 import Logo from "@/components/ui/Logo";
+import { subscribeToNewsletter } from "@/lib/newsletter";
 
 const SOCIAL = [
   { name: "Facebook", url: "https://www.facebook.com/share/1bjtHyaTpU/?mibextid=wwXIfr", bg: "#1877F2", path: "M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" },
@@ -18,8 +22,8 @@ const COL1 = [
 ];
 const COL2 = [
   { name: "Projets en cours", url: "/projets" },
-  { name: "Projets termines", url: "/projets" },
-  { name: "Impact", url: "/projets" },
+  { name: "Impact", url: "/impact" },
+  { name: "Actualites", url: "/actualites" },
   { name: "Partenaires", url: "/contact" },
 ];
 const COL3 = [
@@ -28,6 +32,52 @@ const COL3 = [
   { name: "Partenariat", url: "/contact" },
   { name: "Contact", url: "/contact" },
 ];
+
+function NewsletterForm() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+
+  const handleSubmit = async () => {
+    if (!email || !email.includes("@")) return;
+    setStatus("loading");
+    const result = await subscribeToNewsletter(email, "footer");
+    setStatus(result.success ? "success" : "error");
+    if (result.success) setEmail("");
+  };
+
+  if (status === "success") {
+    return (
+      <p className="text-xs text-secondary-400 font-semibold py-2">
+        ✅ Merci ! Vous etes abonne.
+      </p>
+    );
+  }
+
+  return (
+    <div>
+      <div className="flex gap-2">
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+          placeholder="Votre email"
+          className="flex-1 bg-neutral-700 text-white text-xs px-3 py-2 rounded-lg border border-neutral-600 focus:outline-none focus:border-primary-500 placeholder-neutral-500"
+        />
+        <button
+          onClick={handleSubmit}
+          disabled={status === "loading"}
+          className="bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold px-3 py-2 rounded-lg transition-colors disabled:opacity-50"
+        >
+          {status === "loading" ? "..." : "OK"}
+        </button>
+      </div>
+      {status === "error" && (
+        <p className="text-xs text-red-400 mt-1">Erreur. Reessayez.</p>
+      )}
+    </div>
+  );
+}
 
 export default function Footer() {
   return (
@@ -45,6 +95,7 @@ export default function Footer() {
           </div>
         </div>
       </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
           <div className="lg:col-span-2 space-y-5">
@@ -78,6 +129,7 @@ export default function Footer() {
               </div>
             </div>
           </div>
+
           <div>
             <h4 className="font-semibold text-white mb-4 text-sm uppercase tracking-wider">Organisation</h4>
             <ul className="space-y-2.5">
@@ -90,6 +142,7 @@ export default function Footer() {
               ))}
             </ul>
           </div>
+
           <div>
             <h4 className="font-semibold text-white mb-4 text-sm uppercase tracking-wider">Projets</h4>
             <ul className="space-y-2.5">
@@ -102,6 +155,7 @@ export default function Footer() {
               ))}
             </ul>
           </div>
+
           <div>
             <h4 className="font-semibold text-white mb-4 text-sm uppercase tracking-wider">S impliquer</h4>
             <ul className="space-y-2.5 mb-6">
@@ -116,13 +170,11 @@ export default function Footer() {
             <div className="p-4 bg-neutral-800 rounded-xl border border-neutral-700">
               <p className="text-xs font-semibold text-neutral-300 mb-1">Newsletter</p>
               <p className="text-xs text-neutral-500 mb-3">Restez informe de nos actions</p>
-              <div className="flex gap-2">
-                <input type="email" placeholder="Votre email" className="flex-1 bg-neutral-700 text-white text-xs px-3 py-2 rounded-lg border border-neutral-600 focus:outline-none focus:border-primary-500 placeholder-neutral-500" />
-                <button className="bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold px-3 py-2 rounded-lg transition-colors">OK</button>
-              </div>
+              <NewsletterForm />
             </div>
           </div>
         </div>
+
         <div className="mt-12 pt-8 border-t border-neutral-800">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm text-neutral-500">2025 Help Funds. Tous droits reserves. ONG certifiee.</p>
