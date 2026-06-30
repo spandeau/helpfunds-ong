@@ -1,6 +1,20 @@
 ﻿import "./globals.css";
+import { Inter, Poppins } from "next/font/google";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["500", "600", "700", "800", "900"],
+  variable: "--font-heading",
+  display: "swap",
+});
 
 export const metadata = {
   title: {
@@ -36,7 +50,7 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr">
+    <html lang="fr" className={`${inter.variable} ${poppins.variable}`}>
       <body>
         <Navbar />
         {children}
