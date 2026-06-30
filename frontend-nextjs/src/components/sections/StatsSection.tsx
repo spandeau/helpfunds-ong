@@ -41,69 +41,108 @@ function formatNumber(n: number, original: string): string {
   return n + suffix;
 }
 
-function AnimatedCounter({ value, duration = 2200 }: { value: string; duration?: number }) {
-  const [display, setDisplay] = useState("0");
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const started = useRef(false);
-  const target = parseNumber(value);
+function useCountUp(target: number, original: string, trigger: boolean, duration = 2200) {
+  const [display, setDisplay] = useState(formatNumber(0, original));
+  const playedRef = useRef(false);
 
   useEffect(() => {
-    if (target === 0) {
-      setDisplay(value);
-      return;
-    }
+    if (!trigger || playedRef.current || target === 0) return;
+    playedRef.current = true;
 
-    const el = wrapperRef.current;
+    const start = performance.now();
+    let frameId: number;
+
+    const tick = (now: number) => {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(eased * target);
+      setDisplay(formatNumber(current, original));
+      if (progress < 1) {
+        frameId = requestAnimationFrame(tick);
+      } else {
+        setDisplay(formatNumber(target, original));
+      }
+    };
+
+    frameId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frameId);
+  }, [trigger, target, original, duration]);
+
+  return display;
+}
+
+function StatCard({ stat, index }: { stat: Stat; index: number }) {
+  const [visible, setVisible] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const target = parseNumber(stat.value);
+  const display = useCountUp(target, stat.value, visible);
+
+  useEffect(() => {
+    const el = cardRef.current;
     if (!el) return;
 
-    const runAnimation = () => {
-      if (started.current) return;
-      started.current = true;
-      const start = performance.now();
-
-      const tick = (now: number) => {
-        const elapsed = now - start;
-        const progress = Math.min(elapsed / duration, 1);
-        const eased = 1 - Math.pow(1 - progress, 3);
-        const current = Math.round(eased * target);
-        setDisplay(formatNumber(current, value));
-        if (progress < 1) {
-          requestAnimationFrame(tick);
-        } else {
-          setDisplay(formatNumber(target, value));
-        }
-      };
-      requestAnimationFrame(tick);
+    // Verifie immediatement si deja dans le viewport
+    const checkVisible = () => {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight && rect.bottom > 0) {
+        setVisible(true);
+      }
     };
+
+    checkVisible();
 
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            runAnimation();
-          }
-        });
+        if (entries[0].isIntersecting) setVisible(true);
       },
-      { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }
+      { threshold: 0 }
     );
-
     observer.observe(el);
 
-    // Filet de securite : si l element est deja visible au montage
-    const rect = el.getBoundingClientRect();
-    const alreadyVisible = rect.top < window.innerHeight && rect.bottom > 0;
-    if (alreadyVisible) {
-      const timeout = setTimeout(runAnimation, 300);
-      return () => {
-        clearTimeout(timeout);
-        observer.disconnect();
-      };
-    }
+    window.addEventListener("scroll", checkVisible, { passive: true });
+    window.addEventListener("resize", checkVisible);
 
-    return () => observer.disconnect();
-  }, [value, duration, target]);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", checkVisible);
+      window.removeEventListener("resize", checkVisible);
+    };
+  }, []);
 
-  return <div ref={wrapperRef}>{display}</div>;
+  const Icon = ICONS[stat.icon || "heart"] || Heart;
+  const color = COLORS[index % COLORS.length];
+
+  return (
+    <div
+      ref={cardRef}
+      className={`relative overflow-hidden bg-white rounded-3xl p-8 text-center border ${color.border} shadow-card hover:shadow-card-hover hover:-translate-y-2 transition-all duration-500 group`}
+    >
+      <div className={`absolute -top-6 -right-6 w-24 h-24 ${color.light} rounded-full opacity-60 group-hover:scale-150 transition-transform duration-700`} />
+
+      <div className={`relative w-14 h-14 ${color.light} ${color.border} border rounded-2xl flex items-center justify-center mx-auto mb-5`}>
+        <Icon className={`w-7 h-7 ${color.text}`} />
+      </div>
+
+      <div className={`relative text-4xl md:text-5xl font-heading font-black ${color.text} mb-2 tabular-nums`}>
+        {display}
+      </div>
+
+      <div className="relative font-bold text-neutral-800 text-sm mb-1">
+        {stat.label}
+      </div>
+
+      {stat.description && (
+        <div className="relative text-xs text-neutral-400 leading-relaxed">
+          {stat.description}
+        </div>
+      )}
+
+      <div className="relative mt-4 h-1 bg-neutral-100 rounded-full overflow-hidden">
+        <div className={`h-full ${color.bg} rounded-full transition-all duration-1000`} style={{ width: visible ? "75%" : "0%" }} />
+      </div>
+    </div>
+  );
 }
 
 export default function StatsSection() {
@@ -140,40 +179,9 @@ export default function StatsSection() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {stats.map((stat, i) => {
-            const Icon = ICONS[stat.icon || "heart"] || Heart;
-            const color = COLORS[i % COLORS.length];
-            return (
-              <div
-                key={stat.label}
-                className={`relative overflow-hidden bg-white rounded-3xl p-8 text-center border ${color.border} shadow-card hover:shadow-card-hover hover:-translate-y-2 transition-all duration-500 group`}
-              >
-                <div className={`absolute -top-6 -right-6 w-24 h-24 ${color.light} rounded-full opacity-60 group-hover:scale-150 transition-transform duration-700`} />
-
-                <div className={`relative w-14 h-14 ${color.light} ${color.border} border rounded-2xl flex items-center justify-center mx-auto mb-5`}>
-                  <Icon className={`w-7 h-7 ${color.text}`} />
-                </div>
-
-                <div className={`relative text-4xl md:text-5xl font-heading font-black ${color.text} mb-2 tabular-nums`}>
-                  <AnimatedCounter value={stat.value} duration={2200} />
-                </div>
-
-                <div className="relative font-bold text-neutral-800 text-sm mb-1">
-                  {stat.label}
-                </div>
-
-                {stat.description && (
-                  <div className="relative text-xs text-neutral-400 leading-relaxed">
-                    {stat.description}
-                  </div>
-                )}
-
-                <div className="relative mt-4 h-1 bg-neutral-100 rounded-full overflow-hidden">
-                  <div className={`h-full ${color.bg} rounded-full animate-pulse`} style={{ width: "75%" }} />
-                </div>
-              </div>
-            );
-          })}
+          {stats.map((stat, i) => (
+            <StatCard key={stat.label} stat={stat} index={i} />
+          ))}
         </div>
 
         <div className="mt-14 bg-neutral-50 rounded-3xl border border-neutral-100 p-6 flex flex-wrap justify-center gap-6 md:gap-10 text-sm">
