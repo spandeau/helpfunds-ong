@@ -32,7 +32,7 @@ const COLORS = [
 ];
 
 function parseNumber(value: string): number {
-  return parseInt(value.replace(/\D/g, "")) || 0;
+  return parseInt(value.replace(/\D/g, ""), 10) || 0;
 }
 
 function formatNumber(n: number, original: string): string {
@@ -41,40 +41,69 @@ function formatNumber(n: number, original: string): string {
   return n + suffix;
 }
 
-function AnimatedCounter({ value, duration = 2000 }: { value: string; duration?: number }) {
+function AnimatedCounter({ value, duration = 2200 }: { value: string; duration?: number }) {
   const [display, setDisplay] = useState("0");
-  const ref = useRef<HTMLSpanElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const started = useRef(false);
+  const target = parseNumber(value);
 
   useEffect(() => {
-    const target = parseNumber(value);
-    if (target === 0) { setDisplay(value); return; }
+    if (target === 0) {
+      setDisplay(value);
+      return;
+    }
+
+    const el = wrapperRef.current;
+    if (!el) return;
+
+    const runAnimation = () => {
+      if (started.current) return;
+      started.current = true;
+      const start = performance.now();
+
+      const tick = (now: number) => {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = Math.round(eased * target);
+        setDisplay(formatNumber(current, value));
+        if (progress < 1) {
+          requestAnimationFrame(tick);
+        } else {
+          setDisplay(formatNumber(target, value));
+        }
+      };
+      requestAnimationFrame(tick);
+    };
 
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !started.current) {
-          started.current = true;
-          const start = Date.now();
-          const tick = () => {
-            const elapsed = Date.now() - start;
-            const progress = Math.min(elapsed / duration, 1);
-            // Ease out cubic
-            const eased = 1 - Math.pow(1 - progress, 3);
-            const current = Math.round(eased * target);
-            setDisplay(formatNumber(current, value));
-            if (progress < 1) requestAnimationFrame(tick);
-          };
-          requestAnimationFrame(tick);
-        }
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            runAnimation();
+          }
+        });
       },
-      { threshold: 0.3 }
+      { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }
     );
 
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [value, duration]);
+    observer.observe(el);
 
-  return <span ref={ref}>{display}</span>;
+    // Filet de securite : si l element est deja visible au montage
+    const rect = el.getBoundingClientRect();
+    const alreadyVisible = rect.top < window.innerHeight && rect.bottom > 0;
+    if (alreadyVisible) {
+      const timeout = setTimeout(runAnimation, 300);
+      return () => {
+        clearTimeout(timeout);
+        observer.disconnect();
+      };
+    }
+
+    return () => observer.disconnect();
+  }, [value, duration, target]);
+
+  return <div ref={wrapperRef}>{display}</div>;
 }
 
 export default function StatsSection() {
@@ -119,7 +148,6 @@ export default function StatsSection() {
                 key={stat.label}
                 className={`relative overflow-hidden bg-white rounded-3xl p-8 text-center border ${color.border} shadow-card hover:shadow-card-hover hover:-translate-y-2 transition-all duration-500 group`}
               >
-                {/* Cercle déco en fond */}
                 <div className={`absolute -top-6 -right-6 w-24 h-24 ${color.light} rounded-full opacity-60 group-hover:scale-150 transition-transform duration-700`} />
 
                 <div className={`relative w-14 h-14 ${color.light} ${color.border} border rounded-2xl flex items-center justify-center mx-auto mb-5`}>
@@ -140,7 +168,6 @@ export default function StatsSection() {
                   </div>
                 )}
 
-                {/* Barre de progression déco */}
                 <div className="relative mt-4 h-1 bg-neutral-100 rounded-full overflow-hidden">
                   <div className={`h-full ${color.bg} rounded-full animate-pulse`} style={{ width: "75%" }} />
                 </div>
