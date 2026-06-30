@@ -1,36 +1,84 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useState, useRef } from "react";
 import { Users, FolderOpen, Globe, Heart } from "lucide-react";
-import Container from "@/components/layout/Container";
-import { HOME_STATS } from "@/constants";
 
-interface StrapiStat {
-  id: number;
+interface Stat {
   value: string;
   label: string;
   description?: string;
   icon?: string;
-  order?: number;
 }
 
-const iconMap: Record<string, React.ElementType> = {
+const DEFAULT_STATS: Stat[] = [
+  { value: "50000", label: "Beneficiaires aides", description: "personnes soutenues", icon: "users" },
+  { value: "120", label: "Projets realises", description: "sur le terrain", icon: "folder" },
+  { value: "18", label: "Pays touches", description: "a travers le monde", icon: "globe" },
+  { value: "10", label: "Annees d impact", description: "d experience humanitaire", icon: "heart" },
+];
+
+const ICONS: Record<string, React.ElementType> = {
   users: Users,
   folder: FolderOpen,
   globe: Globe,
   heart: Heart,
 };
 
-const colorMap: Record<number, { bg: string; text: string; border: string }> = {
-  0: { bg: "bg-primary-50", text: "text-primary-600", border: "border-primary-100" },
-  1: { bg: "bg-secondary-50", text: "text-secondary-600", border: "border-secondary-100" },
-  2: { bg: "bg-accent-50", text: "text-accent-600", border: "border-accent-100" },
-  3: { bg: "bg-primary-50", text: "text-primary-600", border: "border-primary-100" },
-};
+const COLORS = [
+  { bg: "bg-primary-500", light: "bg-primary-50", text: "text-primary-500", border: "border-primary-100" },
+  { bg: "bg-secondary-600", light: "bg-secondary-50", text: "text-secondary-600", border: "border-secondary-100" },
+  { bg: "bg-accent-500", light: "bg-accent-50", text: "text-accent-500", border: "border-accent-100" },
+  { bg: "bg-primary-700", light: "bg-primary-50", text: "text-primary-700", border: "border-primary-100" },
+];
+
+function parseNumber(value: string): number {
+  return parseInt(value.replace(/\D/g, "")) || 0;
+}
+
+function formatNumber(n: number, original: string): string {
+  const suffix = original.replace(/[\d\s]/g, "");
+  if (n >= 1000) return n.toLocaleString("fr-FR") + suffix;
+  return n + suffix;
+}
+
+function AnimatedCounter({ value, duration = 2000 }: { value: string; duration?: number }) {
+  const [display, setDisplay] = useState("0");
+  const ref = useRef<HTMLSpanElement>(null);
+  const started = useRef(false);
+
+  useEffect(() => {
+    const target = parseNumber(value);
+    if (target === 0) { setDisplay(value); return; }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !started.current) {
+          started.current = true;
+          const start = Date.now();
+          const tick = () => {
+            const elapsed = Date.now() - start;
+            const progress = Math.min(elapsed / duration, 1);
+            // Ease out cubic
+            const eased = 1 - Math.pow(1 - progress, 3);
+            const current = Math.round(eased * target);
+            setDisplay(formatNumber(current, value));
+            if (progress < 1) requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        }
+      },
+      { threshold: 0.3 }
+    );
+
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [value, duration]);
+
+  return <span ref={ref}>{display}</span>;
+}
 
 export default function StatsSection() {
-  const [stats, setStats] = useState(HOME_STATS);
+  const [stats, setStats] = useState<Stat[]>(DEFAULT_STATS);
 
   useEffect(() => {
     const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
@@ -38,7 +86,7 @@ export default function StatsSection() {
       .then((res) => res.ok ? res.json() : null)
       .then((data) => {
         if (data?.data && data.data.length > 0) {
-          setStats(data.data.map((s: StrapiStat) => ({
+          setStats(data.data.map((s: Stat) => ({
             value: s.value,
             label: s.label,
             description: s.description || "",
@@ -50,89 +98,71 @@ export default function StatsSection() {
   }, []);
 
   return (
-    <section className="py-20 md:py-28 bg-neutral-50">
-      <Container>
-        <div className="text-center mb-16">
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="section-label"
-          >
-            Notre impact
-          </motion.p>
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="section-title"
-          >
-            Des resultats concrets sur le terrain
-          </motion.h2>
+    <section className="py-20 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-14">
+          <span className="section-label">Notre impact</span>
+          <h2 className="section-title">Des resultats concrets sur le terrain</h2>
           <div className="divider" />
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-            className="section-subtitle mx-auto"
-          >
+          <p className="section-subtitle mx-auto">
             Chaque euro donne est trace, audite et utilise directement
             pour maximiser l&apos;impact sur les communautes que nous soutenons.
-          </motion.p>
+          </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {stats.map((stat, index) => {
-            const Icon = iconMap[stat.icon] || Heart;
-            const colors = colorMap[index] || colorMap[0];
+          {stats.map((stat, i) => {
+            const Icon = ICONS[stat.icon || "heart"] || Heart;
+            const color = COLORS[i % COLORS.length];
             return (
-              <motion.div
+              <div
                 key={stat.label}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="bg-white rounded-2xl p-8 text-center border border-neutral-100 hover:border-primary-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+                className={`relative overflow-hidden bg-white rounded-3xl p-8 text-center border ${color.border} shadow-card hover:shadow-card-hover hover:-translate-y-2 transition-all duration-500 group`}
               >
-                <div className={`w-14 h-14 ${colors.bg} border ${colors.border} rounded-2xl flex items-center justify-center mx-auto mb-5`}>
-                  <Icon className={`w-7 h-7 ${colors.text}`} />
+                {/* Cercle déco en fond */}
+                <div className={`absolute -top-6 -right-6 w-24 h-24 ${color.light} rounded-full opacity-60 group-hover:scale-150 transition-transform duration-700`} />
+
+                <div className={`relative w-14 h-14 ${color.light} ${color.border} border rounded-2xl flex items-center justify-center mx-auto mb-5`}>
+                  <Icon className={`w-7 h-7 ${color.text}`} />
                 </div>
-                <div className={`text-4xl font-heading font-bold ${colors.text} mb-2`}>
-                  {stat.value}
+
+                <div className={`relative text-4xl md:text-5xl font-heading font-black ${color.text} mb-2 tabular-nums`}>
+                  <AnimatedCounter value={stat.value} duration={2200} />
                 </div>
-                <div className="font-semibold text-neutral-800 mb-2 text-sm">
+
+                <div className="relative font-bold text-neutral-800 text-sm mb-1">
                   {stat.label}
                 </div>
-                <div className="text-xs text-neutral-400 leading-relaxed">
-                  {stat.description}
+
+                {stat.description && (
+                  <div className="relative text-xs text-neutral-400 leading-relaxed">
+                    {stat.description}
+                  </div>
+                )}
+
+                {/* Barre de progression déco */}
+                <div className="relative mt-4 h-1 bg-neutral-100 rounded-full overflow-hidden">
+                  <div className={`h-full ${color.bg} rounded-full animate-pulse`} style={{ width: "75%" }} />
                 </div>
-              </motion.div>
+              </div>
             );
           })}
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.3 }}
-          className="mt-16 bg-white rounded-2xl border border-neutral-100 p-6 flex flex-wrap justify-center gap-8 text-sm"
-        >
+        <div className="mt-14 bg-neutral-50 rounded-3xl border border-neutral-100 p-6 flex flex-wrap justify-center gap-6 md:gap-10 text-sm">
           {[
             { icon: "✅", text: "Comptes audites annuellement" },
             { icon: "🔒", text: "Dons 100% securises" },
             { icon: "📋", text: "Rapports publics disponibles" },
-            { icon: "🏆", text: "Certifiee organisme d utilite publique" },
+            { icon: "🏆", text: "ONG certifiee d utilite publique" },
           ].map((item) => (
-            <div key={item.text} className="flex items-center gap-2 text-neutral-600">
+            <div key={item.text} className="flex items-center gap-2 text-neutral-600 font-medium">
               <span>{item.icon}</span>
-              <span className="font-medium">{item.text}</span>
+              <span>{item.text}</span>
             </div>
           ))}
-        </motion.div>
-      </Container>
+        </div>
+      </div>
     </section>
   );
 }
