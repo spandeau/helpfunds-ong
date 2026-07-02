@@ -1,6 +1,10 @@
 import HeroSection from "@/components/sections/HeroSection";
 import ActionsSection from "@/components/sections/ActionsSection";
 import StatsSection from "@/components/sections/StatsSection";
+import ProjectsSection from "@/components/sections/ProjectsSection";
+import TestimonialsSection from "@/components/sections/TestimonialsSection";
+import FAQSection from "@/components/sections/FAQSection";
+import PartnersSection from "@/components/sections/PartnersSection";
 import ImpactMap from "@/components/sections/ImpactMap";
 import DonationCTASection from "@/components/sections/DonationCTASection";
 
@@ -10,6 +14,10 @@ export default function Home() {
       <HeroSection />
       <ActionsSection />
       <StatsSection />
+      <ProjectsSection />
+      <TestimonialsSection />
+      <PartnersSection />
+      <FAQSection />
       <ImpactMap />
       <DonationCTASection />
     </main>

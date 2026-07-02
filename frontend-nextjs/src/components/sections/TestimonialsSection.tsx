@@ -1,86 +1,103 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Quote } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Quote, Star } from "lucide-react";
 import Container from "@/components/layout/Container";
 import { HOME_TESTIMONIALS } from "@/constants";
 
+interface Testimonial {
+  id?: number;
+  name: string;
+  role: string;
+  country?: string;
+  text: string;
+  avatar: string;
+  color: string;
+  featured?: boolean;
+}
+
 export default function TestimonialsSection() {
+  const [testimonials, setTestimonials] = useState<Testimonial[]>(HOME_TESTIMONIALS);
+
+  useEffect(() => {
+    const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+    fetch(`${STRAPI_URL}/api/testimonials?filters[featured][$eq]=true&pagination[pageSize]=6`)
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        if (data?.data && data.data.length > 0) {
+          setTestimonials(data.data.map((t: Testimonial) => ({
+            name: t.name,
+            role: t.role,
+            country: t.country || "",
+            text: t.text,
+            avatar: t.name.substring(0, 2).toUpperCase(),
+            color: "bg-primary-500",
+          })));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   return (
-    <section className="py-20 md:py-28 bg-neutral-50">
+    <section className="py-20 md:py-28 bg-neutral-50 overflow-hidden">
       <Container>
-        {/* Header */}
         <div className="text-center mb-16">
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="section-label"
-          >
-            Témoignages
-          </motion.p>
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="section-title"
-          >
-            Ils nous font confiance
-          </motion.h2>
+          <span className="section-label">Temoignages</span>
+          <h2 className="section-title">Ils nous font confiance</h2>
           <div className="divider" />
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-            className="section-subtitle mx-auto"
-          >
-            Donateurs, bénéficiaires et bénévoles partagent leur expérience
-            avec Help Funds.
-          </motion.p>
+          <p className="section-subtitle mx-auto">
+            Donateurs, beneficiaires et benevoles partagent leur experience avec Help Funds.
+          </p>
         </div>
 
-        {/* Testimonials */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {HOME_TESTIMONIALS.map((testimonial, index) => (
-            <motion.div
-              key={testimonial.name}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.15 }}
-              className="bg-white rounded-2xl p-8 border border-neutral-100 hover:border-primary-200 hover:shadow-lg transition-all duration-300 flex flex-col"
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {testimonials.map((t, i) => (
+            <div
+              key={t.name}
+              className={`relative bg-white rounded-3xl p-8 border border-neutral-100 hover:border-primary-200 hover:shadow-xl transition-all duration-500 hover:-translate-y-1 flex flex-col ${
+                i === 1 ? "md:-translate-y-4 border-primary-100 shadow-lg" : ""
+              }`}
             >
-              {/* Quote icon */}
-              <Quote className="w-8 h-8 text-primary-200 mb-5" />
+              {/* Badge vedette */}
+              {i === 1 && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary-500 text-white text-xs font-bold px-4 py-1 rounded-full">
+                  Temoignage vedette
+                </div>
+              )}
 
-              {/* Text */}
-              <p className="text-neutral-600 leading-relaxed flex-1 mb-6 italic text-[15px]">
-                &ldquo;{testimonial.text}&rdquo;
-              </p>
+              {/* Icone citation */}
+              <div className="w-12 h-12 bg-primary-50 rounded-2xl flex items-center justify-center mb-5 flex-shrink-0">
+                <Quote className="w-6 h-6 text-primary-500" />
+              </div>
 
-              {/* Étoiles */}
-              <div className="flex gap-1 mb-5">
-                {[...Array(5)].map((_, i) => (
-                  <span key={i} className="text-amber-400 text-sm">★</span>
+              {/* Etoiles */}
+              <div className="flex gap-1 mb-4">
+                {[...Array(5)].map((_, s) => (
+                  <Star key={s} className="w-4 h-4 fill-amber-400 text-amber-400" />
                 ))}
               </div>
 
-              {/* Author */}
-              <div className="flex items-center gap-3 pt-5 border-t border-neutral-100">
-                <div className={`w-12 h-12 ${testimonial.color} rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0`}>
-                  {testimonial.avatar}
+              {/* Texte */}
+              <p className="text-neutral-600 leading-relaxed flex-1 mb-6 italic text-[15px]">
+                &ldquo;{t.text}&rdquo;
+              </p>
+
+              {/* Auteur */}
+              <div className="flex items-center gap-4 pt-5 border-t border-neutral-100">
+                <div className={`w-12 h-12 ${t.color} rounded-full flex items-center justify-center text-white font-heading font-bold text-sm flex-shrink-0`}>
+                  {t.avatar}
                 </div>
-                <div>
-                  <div className="font-heading font-semibold text-neutral-900 text-sm">
-                    {testimonial.name}
+                <div className="min-w-0">
+                  <div className="font-heading font-bold text-neutral-900 text-sm truncate">
+                    {t.name}
                   </div>
-                  <div className="text-xs text-neutral-500 mt-0.5">{testimonial.role}</div>
-                  <div className="text-xs text-neutral-400 mt-0.5">{testimonial.country}</div>
+                  <div className="text-xs text-primary-500 font-medium mt-0.5">{t.role}</div>
+                  {t.country && (
+                    <div className="text-xs text-neutral-400 mt-0.5">{t.country}</div>
+                  )}
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </Container>
