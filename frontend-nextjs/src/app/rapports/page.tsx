@@ -1,5 +1,8 @@
 import Link from "next/link";
-import { FileText, Download, Calendar, TrendingUp, Users, Globe, Heart, ArrowRight } from "lucide-react";
+import {
+  FileText, Download, Calendar,
+  TrendingUp, Users, Globe, Heart, ArrowRight, Shield
+} from "lucide-react";
 
 export const metadata = {
   title: "Rapports annuels — Help Funds",
@@ -10,7 +13,7 @@ const REPORTS = [
   {
     year: "2024",
     title: "Rapport annuel 2024",
-    description: "Bilan complet de nos actions, projets realises et utilisation des fonds collectes.",
+    description: "Bilan complet de nos actions, projets realises et utilisation des fonds collectes en 2024.",
     stats: { donations: "285 000€", projects: 28, beneficiaries: "12 400", countries: 18 },
     status: "available",
     highlight: true,
@@ -34,110 +37,126 @@ const REPORTS = [
   {
     year: "2021",
     title: "Rapport annuel 2021",
-    description: "Reprise progressive de nos operations terrain apres la periode COVID.",
-    stats: { donations: "145 000€", projects: 15, beneficiaries: "5 800", countries: 10 },
-    status: "available",
-    highlight: false,
-  },
-  {
-    year: "2020",
-    title: "Rapport annuel 2020",
-    description: "Mobilisation exceptionnelle pour la crise COVID : 50 000 repas distribues.",
-    stats: { donations: "190 000€", projects: 18, beneficiaries: "8 500", countries: 14 },
+    description: "Premiere annee complete post-COVID avec une reprise forte de nos interventions.",
+    stats: { donations: "140 000€", projects: 15, beneficiaries: "5 600", countries: 10 },
     status: "available",
     highlight: false,
   },
 ];
 
-const TRANSPARENCY = [
-  { icon: TrendingUp, value: "98%", label: "des fonds sur le terrain", color: "text-secondary-600" },
-  { icon: FileText, value: "100%", label: "des comptes audites", color: "text-primary-600" },
-  { icon: Users, value: "50 000+", label: "beneficiaires documentes", color: "text-purple-600" },
-  { icon: Globe, value: "35", label: "pays d intervention", color: "text-emerald-600" },
+const GUARANTEES = [
+  { icon: Shield, label: "Audit independant", desc: "Comptes certifies par un cabinet independant" },
+  { icon: TrendingUp, label: "98% sur le terrain", desc: "Seulement 2% de frais de structure" },
+  { icon: FileText, label: "Transparence totale", desc: "Tous les rapports disponibles publiquement" },
+  { icon: Heart, label: "Impact mesure", desc: "Indicateurs verifies et documentes" },
 ];
 
 export default function RapportsPage() {
   return (
-    <main>
+    <main className="bg-neutral-50 min-h-screen">
+
+      {/* Hero */}
       <section className="bg-gradient-to-br from-primary-950 via-primary-900 to-primary-800 pt-32 pb-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-2 text-white text-sm font-medium mb-6">
-            <FileText className="w-4 h-4" />
-            Transparence totale
-          </div>
-          <h1 className="font-heading font-bold text-white text-4xl md:text-5xl mb-6 leading-tight">
-            Rapports <span className="text-secondary-400">annuels</span>
+          <span className="inline-block bg-white/10 border border-white/20 text-white text-sm font-semibold px-4 py-2 rounded-full mb-6">
+            Transparence financiere
+          </span>
+          <h1 className="font-heading font-bold text-white text-4xl md:text-6xl mb-6 leading-tight">
+            Nos <span className="text-secondary-400">rapports</span> annuels
           </h1>
-          <p className="text-white/70 text-lg max-w-2xl mx-auto leading-relaxed">
-            Chaque euro compte. Retrouvez ici l ensemble de nos rapports financiers et d activite, audites et publics.
+          <p className="text-xl text-white/70 max-w-2xl mx-auto">
+            La transparence est au coeur de notre engagement. Consultez l utilisation precise de chaque euro qui nous est confie.
           </p>
         </div>
       </section>
 
-      <section className="py-16 bg-white">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
-            {TRANSPARENCY.map((item) => (
-              <div key={item.label} className="text-center p-6 rounded-2xl bg-neutral-50 border border-neutral-100 hover:border-primary-200 hover:shadow-md transition-all">
-                <div className="w-12 h-12 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-                  <item.icon className={`w-6 h-6 ${item.color}`} />
+      {/* Garanties */}
+      <section className="py-12 bg-white border-b border-neutral-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            {GUARANTEES.map((g) => (
+              <div key={g.label} className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <g.icon className="w-6 h-6 text-primary-500" />
                 </div>
-                <div className={`font-heading font-black text-3xl mb-1 ${item.color}`}>{item.value}</div>
-                <div className="text-neutral-500 text-xs leading-tight">{item.label}</div>
+                <div>
+                  <div className="font-bold text-neutral-900 text-sm">{g.label}</div>
+                  <div className="text-xs text-neutral-400">{g.desc}</div>
+                </div>
               </div>
             ))}
           </div>
+        </div>
+      </section>
 
-          <h2 className="font-heading font-bold text-neutral-900 text-2xl mb-8">Rapports disponibles</h2>
+      {/* Liste rapports */}
+      <section className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-14">
+            <span className="section-label">Documents officiels</span>
+            <h2 className="section-title">Rapports et bilans</h2>
+            <div className="divider" />
+          </div>
 
-          <div className="space-y-4">
+          <div className="space-y-6">
             {REPORTS.map((report) => (
               <div
                 key={report.year}
-                className={`bg-white rounded-2xl p-6 border-2 transition-all hover:shadow-md ${
-                  report.highlight ? "border-primary-200 bg-primary-50/30" : "border-neutral-100 hover:border-primary-200"
+                className={`bg-white rounded-3xl border p-8 transition-all duration-300 hover:shadow-xl ${
+                  report.highlight
+                    ? "border-primary-200 shadow-lg ring-1 ring-primary-100"
+                    : "border-neutral-100 hover:border-primary-200"
                 }`}
               >
-                <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
-                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0 ${report.highlight ? "bg-primary-600" : "bg-neutral-100"}`}>
-                    <span className={`font-heading font-black text-lg ${report.highlight ? "text-white" : "text-neutral-600"}`}>
-                      {report.year}
-                    </span>
+                {report.highlight && (
+                  <div className="inline-flex items-center gap-1.5 bg-primary-500 text-white text-xs font-bold px-3 py-1 rounded-full mb-5">
+                    <TrendingUp className="w-3 h-3" />
+                    Rapport le plus recent
+                  </div>
+                )}
+
+                <div className="flex flex-col lg:flex-row lg:items-center gap-8">
+                  <div className="flex-shrink-0">
+                    <div className={`w-20 h-20 rounded-2xl flex flex-col items-center justify-center ${
+                      report.highlight ? "bg-primary-500" : "bg-neutral-100"
+                    }`}>
+                      <Calendar className={`w-6 h-6 mb-1 ${report.highlight ? "text-white" : "text-neutral-500"}`} />
+                      <span className={`font-heading font-black text-lg ${report.highlight ? "text-white" : "text-neutral-700"}`}>
+                        {report.year}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-1">
-                      <h3 className="font-heading font-bold text-neutral-900 text-lg">{report.title}</h3>
-                      {report.highlight && (
-                        <span className="bg-secondary-100 text-secondary-700 text-xs font-bold px-2.5 py-1 rounded-full">
-                          Dernier
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-neutral-500 text-sm mb-4">{report.description}</p>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <h3 className="font-heading font-bold text-neutral-900 text-xl mb-2">
+                      {report.title}
+                    </h3>
+                    <p className="text-neutral-500 text-sm mb-5">{report.description}</p>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       {[
-                        { icon: Heart, label: "Dons", value: report.stats.donations },
-                        { icon: TrendingUp, label: "Projets", value: String(report.stats.projects) },
+                        { icon: Heart, label: "Dons collectes", value: report.stats.donations },
+                        { icon: Globe, label: "Projets", value: report.stats.projects },
                         { icon: Users, label: "Beneficiaires", value: report.stats.beneficiaries },
-                        { icon: Globe, label: "Pays", value: String(report.stats.countries) },
-                      ].map((stat) => (
-                        <div key={stat.label} className="bg-white rounded-xl p-3 border border-neutral-100 text-center">
-                          <p className="font-bold text-neutral-900 text-sm">{stat.value}</p>
-                          <p className="text-neutral-400 text-xs">{stat.label}</p>
+                        { icon: Globe, label: "Pays", value: report.stats.countries },
+                      ].map(({ icon: Icon, label, value }) => (
+                        <div key={label} className="bg-neutral-50 rounded-xl p-3 text-center">
+                          <Icon className="w-4 h-4 text-primary-500 mx-auto mb-1" />
+                          <div className="font-heading font-bold text-neutral-900 text-sm">{value}</div>
+                          <div className="text-xs text-neutral-400">{label}</div>
                         </div>
                       ))}
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-2 flex-shrink-0">
-                    <button className="flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition-all">
+                  <div className="flex flex-col gap-3 flex-shrink-0">
+                    <button className="inline-flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white font-bold px-5 py-3 rounded-xl transition-all text-sm">
                       <Download className="w-4 h-4" />
                       Telecharger PDF
                     </button>
-                    <button className="flex items-center gap-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-semibold px-4 py-2.5 rounded-xl text-sm transition-all">
+                    <button className="inline-flex items-center gap-2 border border-neutral-200 hover:border-primary-300 text-neutral-700 font-semibold px-5 py-3 rounded-xl transition-all text-sm">
                       <FileText className="w-4 h-4" />
-                      Consulter en ligne
+                      Voir en ligne
                     </button>
                   </div>
                 </div>
@@ -147,51 +166,28 @@ export default function RapportsPage() {
         </div>
       </section>
 
-      <section className="py-16 bg-neutral-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-2xl p-8 border border-neutral-100 shadow-sm">
-            <div className="flex flex-col md:flex-row gap-6 items-center">
-              <div className="w-16 h-16 bg-secondary-100 rounded-2xl flex items-center justify-center flex-shrink-0">
-                <Calendar className="w-8 h-8 text-secondary-600" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-heading font-bold text-neutral-900 text-xl mb-2">
-                  Rapport 2025 en cours de preparation
-                </h3>
-                <p className="text-neutral-500 text-sm leading-relaxed">
-                  Notre rapport annuel 2025 sera disponible au premier trimestre 2026.
-                  Inscrivez-vous a notre newsletter pour etre notifie de sa publication.
-                </p>
-              </div>
-              <Link
-                href="/contact"
-                className="inline-flex items-center gap-2 bg-secondary-600 hover:bg-secondary-500 text-white font-bold px-6 py-3 rounded-xl transition-all flex-shrink-0"
-              >
-                S inscrire <ArrowRight className="w-4 h-4" />
+      {/* CTA */}
+      <section className="py-16 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="bg-gradient-to-br from-primary-900 to-primary-950 rounded-3xl p-10">
+            <h2 className="font-heading font-bold text-white text-2xl md:text-3xl mb-3">
+              Soutenez notre mission
+            </h2>
+            <p className="text-white/70 mb-8 max-w-lg mx-auto">
+              Vos dons sont geres avec la plus grande rigueur. Rejoignez nos donateurs.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/don" className="inline-flex items-center gap-2 bg-secondary-600 hover:bg-secondary-700 text-white font-bold px-8 py-4 rounded-2xl transition-all">
+                <Heart className="w-5 h-5 fill-white" />Faire un don
+              </Link>
+              <Link href="/contact" className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold px-8 py-4 rounded-2xl transition-all">
+                Nous contacter <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="py-16 bg-gradient-to-br from-primary-900 to-primary-950">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="font-heading font-bold text-white text-2xl mb-4">
-            Notre engagement envers la transparence
-          </h2>
-          <p className="text-white/70 mb-8 max-w-2xl mx-auto">
-            Nous sommes audites chaque annee par un cabinet independant. Tous nos comptes sont publics et accessibles a tout moment.
-          </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Link href="/don" className="inline-flex items-center gap-2 bg-secondary-600 hover:bg-secondary-500 text-white font-bold px-8 py-4 rounded-2xl transition-all hover:-translate-y-0.5">
-              <Heart className="w-5 h-5 fill-white" />Faire un don
-            </Link>
-            <Link href="/contact" className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold px-8 py-4 rounded-2xl transition-all">
-              Nous contacter <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
     </main>
   );
 }
