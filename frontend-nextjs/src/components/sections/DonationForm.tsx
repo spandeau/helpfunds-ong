@@ -5,13 +5,15 @@ import Image from "next/image";
 import Link from "next/link";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
+import { motion, AnimatePresence } from "framer-motion";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import StripePaymentForm from "@/components/sections/StripePaymentForm";
+import Logo from "@/components/ui/Logo";
 import {
   Heart, User, Mail, MessageSquare, CreditCard,
   Repeat, Gift, Check, ChevronLeft, ChevronRight,
-  Shield, ArrowRight, Smartphone, X, Lock
+  Shield, ArrowRight, Smartphone, X, Lock, HeartHandshake
 } from "lucide-react";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
@@ -115,8 +117,8 @@ type PaymentMethod = "stripe" | "mobile_money" | null;
 
 export default function DonationForm() {
   const [step, setStep] = useState<Step>(1);
-  const [donationType, setDonationType] = useState<DonationType>("unique");
-  const [customAmount, setCustomAmount] = useState<string>("50");
+  const [donationType, setDonationType] = useState<DonationType>("mensuel");
+  const [customAmount, setCustomAmount] = useState<string>("100");
   const [selectedProject, setSelectedProject] = useState("general");
   const [anonymous, setAnonymous] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(null);
@@ -128,6 +130,25 @@ export default function DonationForm() {
   const [loadingStripe, setLoadingStripe] = useState(false);
 
   const finalAmount = Number(customAmount) || 0;
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [step]);
+
+  const handleCloseSuccessModal = () => {
+    // Reset complet : le formulaire est prêt pour un nouveau don
+    setSubmitted(false);
+    setStep(1);
+    setPaymentMethod(null);
+    setShowPaymentModal(false);
+    setClientSecret("");
+    setFormData({ firstName: "", lastName: "", email: "", message: "" });
+    setMobileData({ phone: "", operator: "mtn" });
+    setAnonymous(false);
+    setSelectedProject("general");
+    setDonationType("mensuel");
+    setCustomAmount("100");
+  };
 
   const handlePaymentChoice = async (method: "stripe" | "mobile_money") => {
     setPaymentMethod(method);
@@ -143,9 +164,13 @@ export default function DonationForm() {
             amount: finalAmount,
             currency: "eur",
             donorName: anonymous ? "Anonyme" : `${formData.firstName} ${formData.lastName}`,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
             email: formData.email,
             project: selectedProject,
             donationType,
+            anonymous,
+            message: formData.message,
           }),
         });
         const data = await res.json();
@@ -163,29 +188,48 @@ export default function DonationForm() {
     }
   };
 
-  if (submitted) {
-    return (
-      <section className="py-20 bg-white">
-        <div className="max-w-2xl mx-auto px-4 text-center">
-          <div className="w-24 h-24 bg-secondary-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Check className="w-12 h-12 text-secondary-600" />
-          </div>
-          <h2 className="font-heading font-bold text-neutral-900 text-3xl mb-4">Merci {formData.firstName} !</h2>
-          <p className="text-neutral-500 text-lg mb-2">
-            Votre don de <span className="font-bold text-secondary-600">{finalAmount}€</span>
-            {donationType === "mensuel" ? " par mois" : ""} a bien ete enregistre.
-          </p>
-          <p className="text-neutral-400 text-sm mb-8">Un recu fiscal sera envoye a {formData.email}</p>
-          <Link href="/" className="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-bold px-8 py-4 rounded-2xl transition-all">
-            Retour a l accueil
-          </Link>
-        </div>
-      </section>
-    );
-  }
-
   return (
     <div>
+      {/* Pop-up succes du don */}
+      <AnimatePresence>
+        {submitted && (
+          <motion.div
+            className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <motion.div
+              className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl text-center"
+              initial={{ opacity: 0, scale: 0.85 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.85 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+            >
+              <div className="mb-6 flex justify-center">
+                <Logo size="sm" variant="dark" href="" />
+              </div>
+              <div className="w-20 h-20 bg-secondary-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <HeartHandshake className="w-10 h-10 text-secondary-600" />
+              </div>
+              <h2 className="font-heading font-bold text-neutral-900 text-2xl mb-4">
+                Merci pour votre don !
+              </h2>
+              <p className="text-neutral-500 text-base mb-8">
+                Votre don a ete recu avec succes. Votre generosite contribue directement a notre mission. Nous vous remercions sincerement pour votre soutien.
+              </p>
+              <button
+                onClick={handleCloseSuccessModal}
+                className="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-4 rounded-2xl transition-all"
+              >
+                OK
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Modal choix paiement */}
       {showPaymentModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
@@ -366,12 +410,12 @@ export default function DonationForm() {
                   </div>
                   <div className="flex gap-4 mt-8">
                     <button onClick={() => setStep(1)} className="flex-1 py-4 rounded-2xl border-2 border-neutral-200 text-neutral-600 font-semibold flex items-center justify-center gap-2">
-                      <ChevronLeft className="w-4 h-4" />Retour
+                      <ChevronLeft className="w-4 h-4" />Precedent
                     </button>
                     <button onClick={() => formData.firstName && formData.email && setShowPaymentModal(true)}
                       disabled={!formData.firstName || !formData.email}
                       className="flex-1 bg-primary-600 hover:bg-primary-700 disabled:bg-neutral-200 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2">
-                      Choisir le paiement <ArrowRight className="w-4 h-4" />
+                      Suivant <ArrowRight className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -461,7 +505,7 @@ export default function DonationForm() {
                   </div>
                   <div className="flex gap-4 mt-8">
                     <button onClick={() => { setStep(2); setShowPaymentModal(true); }} className="flex-1 py-4 rounded-2xl border-2 border-neutral-200 text-neutral-600 font-semibold flex items-center justify-center gap-2">
-                      <ChevronLeft className="w-4 h-4" />Retour
+                      <ChevronLeft className="w-4 h-4" />Precedent
                     </button>
                     <button onClick={() => setSubmitted(true)} disabled={!mobileData.phone}
                       className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:bg-neutral-200 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2">

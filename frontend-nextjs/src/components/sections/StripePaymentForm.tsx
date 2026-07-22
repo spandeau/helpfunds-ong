@@ -25,6 +25,7 @@ export default function StripePaymentForm({
   const elements = useElements();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,6 +33,7 @@ export default function StripePaymentForm({
 
     setLoading(true);
     setError("");
+    setInfo("");
 
     const { error: submitError } = await elements.submit();
     if (submitError) {
@@ -40,7 +42,7 @@ export default function StripePaymentForm({
       return;
     }
 
-    const { error: confirmError } = await stripe.confirmPayment({
+    const { error: confirmError, paymentIntent } = await stripe.confirmPayment({
       elements,
       confirmParams: {
         return_url: `${window.location.origin}/don/succes`,
@@ -51,9 +53,26 @@ export default function StripePaymentForm({
     if (confirmError) {
       setError(confirmError.message || "Paiement echoue");
       setLoading(false);
-    } else {
-      onSuccess();
+      return;
     }
+
+    if (paymentIntent?.status === "succeeded") {
+      onSuccess();
+      return;
+    }
+
+    if (paymentIntent?.status === "processing") {
+      setInfo(
+        "Votre paiement est en cours de traitement (cela peut prendre quelques jours pour un virement SEPA). Vous recevrez une confirmation par email des que le don sera valide."
+      );
+      setLoading(false);
+      return;
+    }
+
+    setError(
+      "Le paiement n'a pas pu etre confirme. Verifiez vos informations ou reessayez."
+    );
+    setLoading(false);
   };
 
   return (
@@ -77,6 +96,12 @@ export default function StripePaymentForm({
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-xl p-4">
           <p className="text-red-600 text-sm">{error}</p>
+        </div>
+      )}
+
+      {info && (
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+          <p className="text-blue-700 text-sm">{info}</p>
         </div>
       )}
 

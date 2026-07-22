@@ -60,7 +60,8 @@ export class StrapiClient {
       });
 
       if (!response.ok) {
-        console.warn(`[Strapi] Erreur ${response.status} pour ${endpoint}`);
+        const errorBody = await response.text().catch(() => "");
+        console.warn(`[Strapi] Erreur ${response.status} pour ${endpoint} ${errorBody}`);
         return null;
       }
 
@@ -90,6 +91,42 @@ export class StrapiClient {
       `/${contentType}?${params}`
     );
     return result?.data ?? null;
+  }
+
+  async create<T>(
+    contentType: string,
+    data: Record<string, unknown>
+  ): Promise<T | null> {
+    const result = await this.fetch<StrapiResponse<T>>(`/${contentType}`, {
+      method: "POST",
+      body: JSON.stringify({ data }),
+    });
+    return result?.data ?? null;
+  }
+
+  async update<T>(
+    contentType: string,
+    documentId: string,
+    data: Record<string, unknown>
+  ): Promise<T | null> {
+    const result = await this.fetch<StrapiResponse<T>>(
+      `/${contentType}/${documentId}`,
+      {
+        method: "PUT",
+        body: JSON.stringify({ data }),
+      }
+    );
+    return result?.data ?? null;
+  }
+
+  async findOneByField<T>(
+    contentType: string,
+    field: string,
+    value: string
+  ): Promise<(T & { documentId: string }) | null> {
+    const params = `filters[${field}][$eq]=${encodeURIComponent(value)}`;
+    const result = await this.fetch<StrapiResponse<(T & { documentId: string })[]>>(`/${contentType}?${params}`);
+    return result?.data?.[0] ?? null;
   }
 }
 

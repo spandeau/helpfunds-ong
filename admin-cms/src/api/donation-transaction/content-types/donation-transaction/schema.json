@@ -11,7 +11,7 @@
     "reference": { "type": "string", "unique": true },
     "amount": { "type": "decimal", "required": true },
     "currency": { "type": "string", "default": "EUR" },
-    "status": {
+    "paymentStatus": {
       "type": "enumeration",
       "enum": ["pending", "completed", "failed", "refunded", "cancelled"],
       "default": "pending"

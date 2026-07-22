@@ -710,6 +710,10 @@ export interface ApiDonationTransactionDonationTransaction
       ['stripe', 'paypal', 'card', 'bank_transfer', 'other']
     > &
       Schema.Attribute.DefaultTo<'stripe'>;
+    paymentStatus: Schema.Attribute.Enumeration<
+      ['pending', 'completed', 'failed', 'refunded', 'cancelled']
+    > &
+      Schema.Attribute.DefaultTo<'pending'>;
     project: Schema.Attribute.Relation<'manyToOne', 'api::project.project'>;
     publishedAt: Schema.Attribute.DateTime;
     recurringInterval: Schema.Attribute.Enumeration<
@@ -717,10 +721,6 @@ export interface ApiDonationTransactionDonationTransaction
     > &
       Schema.Attribute.DefaultTo<'monthly'>;
     reference: Schema.Attribute.String & Schema.Attribute.Unique;
-    status: Schema.Attribute.Enumeration<
-      ['pending', 'completed', 'failed', 'refunded', 'cancelled']
-    > &
-      Schema.Attribute.DefaultTo<'pending'>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
