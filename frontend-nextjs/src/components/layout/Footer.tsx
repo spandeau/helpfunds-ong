@@ -34,15 +34,21 @@ const COL3 = [
 ];
 
 function NewsletterForm() {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
   const handleSubmit = async () => {
     if (!email || !email.includes("@")) return;
     setStatus("loading");
-    const result = await subscribeToNewsletter(email, "footer");
+    const result = await subscribeToNewsletter(email, "footer", firstName, lastName);
     setStatus(result.success ? "success" : "error");
-    if (result.success) setEmail("");
+    if (result.success) {
+      setEmail("");
+      setFirstName("");
+      setLastName("");
+    }
   };
 
   if (status === "success") {
@@ -55,6 +61,22 @@ function NewsletterForm() {
 
   return (
     <div>
+      <div className="grid grid-cols-2 gap-2 mb-2">
+        <input
+          type="text"
+          value={firstName}
+          onChange={(e) => setFirstName(e.target.value)}
+          placeholder="Prenom"
+          className="bg-neutral-700 text-white text-xs px-3 py-2 rounded-lg border border-neutral-600 focus:outline-none focus:border-primary-500 placeholder-neutral-500"
+        />
+        <input
+          type="text"
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
+          placeholder="Nom"
+          className="bg-neutral-700 text-white text-xs px-3 py-2 rounded-lg border border-neutral-600 focus:outline-none focus:border-primary-500 placeholder-neutral-500"
+        />
+      </div>
       <div className="flex gap-2">
         <input
           type="email"

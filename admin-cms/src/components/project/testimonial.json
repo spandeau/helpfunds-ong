@@ -1,0 +1,14 @@
+{
+  "collectionName": "components_project_testimonials_v2",
+  "info": {
+    "displayName": "Testimonial",
+    "icon": "quote"
+  },
+  "options": {},
+  "attributes": {
+    "name": { "type": "string", "required": true },
+    "role": { "type": "string" },
+    "text": { "type": "text", "required": true },
+    "avatar": { "type": "string" }
+  }
+}

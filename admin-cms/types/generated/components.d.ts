@@ -1,5 +1,67 @@
 import type { Schema, Struct } from '@strapi/strapi';
 
+export interface ProjectMilestone extends Struct.ComponentSchema {
+  collectionName: 'components_project_milestones_v2';
+  info: {
+    displayName: 'Milestone';
+    icon: 'calendar';
+  };
+  attributes: {
+    date: Schema.Attribute.String & Schema.Attribute.Required;
+    description: Schema.Attribute.Text;
+    done: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+  };
+}
+
+export interface ProjectTestimonial extends Struct.ComponentSchema {
+  collectionName: 'components_project_testimonials_v2';
+  info: {
+    displayName: 'Testimonial';
+    icon: 'quote';
+  };
+  attributes: {
+    avatar: Schema.Attribute.String;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
+    role: Schema.Attribute.String;
+    text: Schema.Attribute.Text & Schema.Attribute.Required;
+  };
+}
+
+export interface ProjectUpdate extends Struct.ComponentSchema {
+  collectionName: 'components_project_updates_v2';
+  info: {
+    displayName: 'Update';
+    icon: 'pencil';
+  };
+  attributes: {
+    content: Schema.Attribute.Text & Schema.Attribute.Required;
+    date: Schema.Attribute.String & Schema.Attribute.Required;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+  };
+}
+
+export interface SharedBudgetItem extends Struct.ComponentSchema {
+  collectionName: 'components_shared_budget_items';
+  info: {
+    displayName: 'Budget Item';
+    icon: 'chartPie';
+  };
+  attributes: {
+    color: Schema.Attribute.String & Schema.Attribute.DefaultTo<'#2563eb'>;
+    label: Schema.Attribute.String & Schema.Attribute.Required;
+    percentage: Schema.Attribute.Integer &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 100;
+          min: 0;
+        },
+        number
+      >;
+  };
+}
+
 export interface SharedMedia extends Struct.ComponentSchema {
   collectionName: 'components_shared_media';
   info: {
@@ -62,14 +124,30 @@ export interface SharedSlider extends Struct.ComponentSchema {
   };
 }
 
+export interface SharedTextItem extends Struct.ComponentSchema {
+  collectionName: 'components_shared_text_items';
+  info: {
+    displayName: 'Text Item';
+    icon: 'bulletList';
+  };
+  attributes: {
+    text: Schema.Attribute.String & Schema.Attribute.Required;
+  };
+}
+
 declare module '@strapi/strapi' {
   export module Public {
     export interface ComponentSchemas {
+      'project.milestone': ProjectMilestone;
+      'project.testimonial': ProjectTestimonial;
+      'project.update': ProjectUpdate;
+      'shared.budget-item': SharedBudgetItem;
       'shared.media': SharedMedia;
       'shared.quote': SharedQuote;
       'shared.rich-text': SharedRichText;
       'shared.seo': SharedSeo;
       'shared.slider': SharedSlider;
+      'shared.text-item': SharedTextItem;
     }
   }
 }

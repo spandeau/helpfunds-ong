@@ -1,0 +1,22 @@
+{
+  "kind": "collectionType",
+  "collectionName": "newsletter_campaigns",
+  "info": {
+    "singularName": "newsletter-campaign",
+    "pluralName": "newsletter-campaigns",
+    "displayName": "Campagne Newsletter"
+  },
+  "options": { "draftAndPublish": false },
+  "attributes": {
+    "subject": { "type": "string", "required": true },
+    "content": { "type": "text", "required": true },
+    "status": {
+      "type": "enumeration",
+      "enum": ["brouillon", "envoyee"],
+      "default": "brouillon",
+      "required": true
+    },
+    "sentAt": { "type": "datetime" },
+    "recipientCount": { "type": "integer", "default": 0 }
+  }
+}

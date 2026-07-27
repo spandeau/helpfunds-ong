@@ -1,4 +1,3 @@
-import { strapiClient } from "@/services/strapi";
 import { PROJECTS } from "@/lib/projects-data";
 import type { Project } from "@/lib/projects-data";
 
@@ -11,7 +10,7 @@ interface StrapiProject {
   category: string;
   country: string;
   region?: string;
-  status: "en-cours" | "urgent" | "termine" | "nouveau";
+  status: "en-cours" | "urgent" | "termine" | "en-preparation";
   featured: boolean;
   goalAmount: number;
   raisedAmount: number;
@@ -21,9 +20,9 @@ interface StrapiProject {
   endDate?: string;
   team?: number;
   villages?: number;
-  objectives?: string[];
-  results?: string[];
-  remaining?: string[];
+  objectives?: { text: string }[];
+  results?: { text: string }[];
+  remaining?: { text: string }[];
   milestones?: unknown[];
   updates?: unknown[];
   budgetBreakdown?: unknown[];
@@ -32,9 +31,13 @@ interface StrapiProject {
   gallery?: { url: string }[];
 }
 
+function getStrapiUrl(): string {
+  return process.env.STRAPI_URL || process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+}
+
 function toUrl(url?: string): string {
   if (!url) return "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=1200&q=80";
-  const BASE = process.env.STRAPI_URL || process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+  const BASE = getStrapiUrl();
   return url.startsWith("http") ? url : `${BASE}${url}`;
 }
 
@@ -48,7 +51,7 @@ function strapiProjectToProject(p: StrapiProject): Project {
     category: p.category || "sante",
     country: p.country || "",
     region: p.region || "",
-    status: p.status || "nouveau",
+    status: p.status || "en-preparation",
     featured: p.featured || false,
     goalAmount: p.goalAmount || 0,
     raisedAmount: p.raisedAmount || 0,
@@ -60,9 +63,9 @@ function strapiProjectToProject(p: StrapiProject): Project {
     ],
     startDate: p.startDate || new Date().toISOString().split("T")[0],
     endDate: p.endDate,
-    objectives: p.objectives || [],
-    results: p.results || [],
-    remaining: p.remaining || [],
+    objectives: p.objectives?.map((o) => o.text) || [],
+    results: p.results?.map((r) => r.text) || [],
+    remaining: p.remaining?.map((r) => r.text) || [],
     milestones: (p.milestones as Project["milestones"]) || [],
     updates: (p.updates as Project["updates"]) || [],
     budgetBreakdown: (p.budgetBreakdown as Project["budgetBreakdown"]) || [],
@@ -74,9 +77,13 @@ function strapiProjectToProject(p: StrapiProject): Project {
 
 export async function getAllProjects(): Promise<Project[]> {
   try {
-    const result = await strapiClient.fetch<{ data: StrapiProject[] }>(
-      "/projects?populate[coverImage]=true&populate[gallery]=true&sort=createdAt:desc&pagination[pageSize]=50"
+    const response = await fetch(
+      getStrapiUrl() + "/api/projects?populate[coverImage]=true&populate[gallery]=true&populate[objectives]=true&populate[results]=true&populate[remaining]=true&populate[milestones]=true&populate[updates]=true&populate[budgetBreakdown]=true&populate[testimonials]=true&sort=createdAt:desc&pagination[pageSize]=50"
     );
+    if (!response.ok) {
+      throw new Error("Strapi status " + response.status);
+    }
+    const result = (await response.json()) as { data: StrapiProject[] };
     if (result?.data && result.data.length > 0) {
       console.log(`[Projects] ${result.data.length} projets depuis Strapi`);
       return result.data.map(strapiProjectToProject);
@@ -89,9 +96,13 @@ export async function getAllProjects(): Promise<Project[]> {
 
 export async function getProjectBySlug(slug: string): Promise<Project | null> {
   try {
-    const result = await strapiClient.fetch<{ data: StrapiProject[] }>(
-      `/projects?filters[slug][$eq]=${slug}&populate[coverImage]=true&populate[gallery]=true`
+    const response = await fetch(
+      getStrapiUrl() + "/api/projects?filters[slug][$eq]=" + encodeURIComponent(slug) + "&populate[coverImage]=true&populate[gallery]=true&populate[objectives]=true&populate[results]=true&populate[remaining]=true&populate[milestones]=true&populate[updates]=true&populate[budgetBreakdown]=true&populate[testimonials]=true"
     );
+    if (!response.ok) {
+      throw new Error("Strapi status " + response.status);
+    }
+    const result = (await response.json()) as { data: StrapiProject[] };
     if (result?.data && result.data.length > 0) {
       return strapiProjectToProject(result.data[0]);
     }
@@ -103,9 +114,13 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
 
 export async function getFeaturedProjects(): Promise<Project[]> {
   try {
-    const result = await strapiClient.fetch<{ data: StrapiProject[] }>(
-      "/projects?filters[featured][$eq]=true&populate[coverImage]=true&pagination[pageSize]=6"
+    const response = await fetch(
+      getStrapiUrl() + "/api/projects?filters[featured][$eq]=true&populate[coverImage]=true&pagination[pageSize]=6"
     );
+    if (!response.ok) {
+      throw new Error("Strapi status " + response.status);
+    }
+    const result = (await response.json()) as { data: StrapiProject[] };
     if (result?.data && result.data.length > 0) {
       return result.data.map(strapiProjectToProject);
     }

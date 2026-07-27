@@ -2,7 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { getAllProjects } from "@/lib/projects";
-import { MapPin, Users, Heart, Clock, AlertTriangle, Sparkles, CheckCircle } from "lucide-react";
+import { MapPin, Users, Heart, Clock, AlertTriangle, Sparkles, CheckCircle, X } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Nos Projets — Help Funds",
@@ -13,7 +13,7 @@ const STATUS_CONFIG = {
   urgent: { label: "Urgent", color: "bg-red-100 text-red-700", icon: AlertTriangle },
   "en-cours": { label: "En cours", color: "bg-secondary-100 text-secondary-700", icon: Clock },
   termine: { label: "Termine", color: "bg-neutral-100 text-neutral-600", icon: CheckCircle },
-  nouveau: { label: "En cours", color: "bg-secondary-100 text-secondary-700", icon: Sparkles },
+  "en-preparation": { label: "En preparation", color: "bg-primary-100 text-primary-700", icon: Sparkles },
 } as const;
 
 const CAT_LABELS: Record<string, string> = {
@@ -25,8 +25,20 @@ function formatCurrency(n: number) {
   return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", minimumFractionDigits: 0 }).format(n);
 }
 
-export default async function ProjetsPage() {
-  const projects = await getAllProjects();
+export default async function ProjetsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const params = await searchParams;
+  const rawStatus = params.status;
+  const statusFilter = Array.isArray(rawStatus) ? rawStatus[0] : rawStatus;
+
+  const allProjects = await getAllProjects();
+  const isValidStatus = statusFilter && statusFilter in STATUS_CONFIG;
+  const projects = isValidStatus
+    ? allProjects.filter((p) => p.status === statusFilter)
+    : allProjects;
 
   return (
     <main className="min-h-screen bg-neutral-50">
@@ -48,14 +60,29 @@ export default async function ProjetsPage() {
 
       <section className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {isValidStatus && (
+            <div className="flex items-center gap-3 mb-8">
+              <span className="text-sm text-neutral-500">Filtre actif :</span>
+              <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full ${STATUS_CONFIG[statusFilter as keyof typeof STATUS_CONFIG].color}`}>
+                {STATUS_CONFIG[statusFilter as keyof typeof STATUS_CONFIG].label}
+              </span>
+              <Link href="/projets" className="inline-flex items-center gap-1 text-xs font-semibold text-neutral-400 hover:text-red-600 transition-colors">
+                <X className="w-3.5 h-3.5" />Retirer le filtre
+              </Link>
+            </div>
+          )}
+
           {projects.length === 0 ? (
             <div className="text-center py-20">
-              <p className="text-neutral-400 text-lg">Aucun projet disponible pour le moment.</p>
+              <p className="text-neutral-400 text-lg">Aucun projet disponible pour ce filtre.</p>
+              <Link href="/projets" className="inline-block mt-4 text-primary-600 font-semibold hover:underline">
+                Voir tous les projets
+              </Link>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {projects.map((project) => {
-                const status = STATUS_CONFIG[project.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG["nouveau"];
+                const status = STATUS_CONFIG[project.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG["en-preparation"];
                 const StatusIcon = status.icon;
                 const progress = project.goalAmount > 0
                   ? Math.min(Math.round((project.raisedAmount / project.goalAmount) * 100), 100)

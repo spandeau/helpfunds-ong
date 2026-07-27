@@ -1,7 +1,8 @@
-﻿import "./globals.css";
+import "./globals.css";
 import { Inter, Poppins } from "next/font/google";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { SITE_URL } from "@/constants";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -25,11 +26,11 @@ export const metadata = {
   keywords: ["ONG", "humanitaire", "don", "aide", "Afrique", "projets", "Help Funds"],
   authors: [{ name: "Help Funds" }],
   creator: "Help Funds",
-  metadataBase: new URL("https://helpfunds-ong-3bzx.vercel.app"),
+  metadataBase: new URL(SITE_URL),
   openGraph: {
     title: "Help Funds — ONG Internationale",
     description: "Soutenez nos projets humanitaires dans 35 pays.",
-    url: "https://helpfunds-ong-3bzx.vercel.app",
+    url: SITE_URL,
     siteName: "Help Funds",
     images: [{ url: "/logo.png", width: 400, height: 200, alt: "Help Funds" }],
     locale: "fr_FR",

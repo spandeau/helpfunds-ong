@@ -727,41 +727,6 @@ export interface ApiDonationTransactionDonationTransaction
   };
 }
 
-export interface ApiDonationDonation extends Struct.CollectionTypeSchema {
-  collectionName: 'donations';
-  info: {
-    displayName: 'Donation';
-    pluralName: 'donations';
-    singularName: 'donation';
-  };
-  options: {
-    draftAndPublish: true;
-  };
-  attributes: {
-    amount: Schema.Attribute.Integer;
-    anonymous: Schema.Attribute.Boolean;
-    createdAt: Schema.Attribute.DateTime;
-    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-    currency: Schema.Attribute.String;
-    donorName: Schema.Attribute.String;
-    email: Schema.Attribute.Email;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<
-      'oneToMany',
-      'api::donation.donation'
-    > &
-      Schema.Attribute.Private;
-    paymentMethod: Schema.Attribute.String;
-    publishedAt: Schema.Attribute.DateTime;
-    statusd: Schema.Attribute.Enumeration<['noon']>;
-    transactionId: Schema.Attribute.UID<'donorName'>;
-    updatedAt: Schema.Attribute.DateTime;
-    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-  };
-}
-
 export interface ApiFaqFaq extends Struct.CollectionTypeSchema {
   collectionName: 'faqs';
   info: {
@@ -901,24 +866,60 @@ export interface ApiImpactStatImpactStat extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
-    beneficiaries: Schema.Attribute.Integer;
-    countries: Schema.Attribute.Integer;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    donations: Schema.Attribute.Integer;
+    description: Schema.Attribute.Text;
+    icon: Schema.Attribute.Enumeration<['users', 'folder', 'globe', 'heart']> &
+      Schema.Attribute.DefaultTo<'heart'>;
+    label: Schema.Attribute.String & Schema.Attribute.Required;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::impact-stat.impact-stat'
     > &
       Schema.Attribute.Private;
-    projects: Schema.Attribute.Integer;
+    order: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
     publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    volunteers: Schema.Attribute.Integer;
+    value: Schema.Attribute.String & Schema.Attribute.Required;
+  };
+}
+
+export interface ApiNewsletterCampaignNewsletterCampaign
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'newsletter_campaigns';
+  info: {
+    displayName: 'Campagne Newsletter';
+    pluralName: 'newsletter-campaigns';
+    singularName: 'newsletter-campaign';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    content: Schema.Attribute.Text & Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::newsletter-campaign.newsletter-campaign'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    recipientCount: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    sentAt: Schema.Attribute.DateTime;
+    status: Schema.Attribute.Enumeration<['brouillon', 'envoyee']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'brouillon'>;
+    subject: Schema.Attribute.String & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
   };
 }
 
@@ -982,10 +983,14 @@ export interface ApiPartnerPartner extends Struct.CollectionTypeSchema {
       'api::partner.partner'
     > &
       Schema.Attribute.Private;
+    logo: Schema.Attribute.Media<'images'>;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
+    order: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
     publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    website: Schema.Attribute.String;
   };
 }
 
@@ -1004,7 +1009,7 @@ export interface ApiProjectProject extends Struct.CollectionTypeSchema {
     beneficiaries: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
     beneficiariesTarget: Schema.Attribute.Integer &
       Schema.Attribute.DefaultTo<0>;
-    budgetBreakdown: Schema.Attribute.JSON;
+    budgetBreakdown: Schema.Attribute.Component<'shared.budget-item', true>;
     campaigns: Schema.Attribute.Relation<
       'oneToMany',
       'api::donation-campaign.donation-campaign'
@@ -1027,29 +1032,29 @@ export interface ApiProjectProject extends Struct.CollectionTypeSchema {
       'api::project.project'
     > &
       Schema.Attribute.Private;
-    milestones: Schema.Attribute.JSON;
-    objectives: Schema.Attribute.JSON;
+    milestones: Schema.Attribute.Component<'project.milestone', true>;
+    objectives: Schema.Attribute.Component<'shared.text-item', true>;
     publishedAt: Schema.Attribute.DateTime;
     raisedAmount: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
     region: Schema.Attribute.String;
-    remaining: Schema.Attribute.JSON;
-    results: Schema.Attribute.JSON;
+    remaining: Schema.Attribute.Component<'shared.text-item', true>;
+    results: Schema.Attribute.Component<'shared.text-item', true>;
     seo: Schema.Attribute.Component<'shared.seo', false>;
     shortDescription: Schema.Attribute.Text & Schema.Attribute.Required;
     slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
     startDate: Schema.Attribute.Date;
     status: Schema.Attribute.Enumeration<
-      ['nouveau', 'en-cours', 'urgent', 'termine']
+      ['en-preparation', 'en-cours', 'urgent', 'termine']
     > &
       Schema.Attribute.Required &
-      Schema.Attribute.DefaultTo<'nouveau'>;
+      Schema.Attribute.DefaultTo<'en-preparation'>;
     team: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
-    testimonials: Schema.Attribute.JSON;
+    testimonials: Schema.Attribute.Component<'project.testimonial', true>;
     title: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    updates: Schema.Attribute.JSON;
+    updates: Schema.Attribute.Component<'project.update', true>;
     villages: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
   };
 }
@@ -1115,6 +1120,8 @@ export interface ApiTeamMemberTeamMember extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.DefaultTo<'terrain'>;
     email: Schema.Attribute.Email;
+    facebook: Schema.Attribute.String;
+    instagram: Schema.Attribute.String;
     linkedin: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
@@ -1127,10 +1134,12 @@ export interface ApiTeamMemberTeamMember extends Struct.CollectionTypeSchema {
     photo: Schema.Attribute.Media<'images'>;
     publishedAt: Schema.Attribute.DateTime;
     role: Schema.Attribute.String & Schema.Attribute.Required;
+    slug: Schema.Attribute.UID<'name'> & Schema.Attribute.Required;
     twitter: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    whatsapp: Schema.Attribute.String;
   };
 }
 
@@ -1687,11 +1696,11 @@ declare module '@strapi/strapi' {
       'api::contact-message.contact-message': ApiContactMessageContactMessage;
       'api::donation-campaign.donation-campaign': ApiDonationCampaignDonationCampaign;
       'api::donation-transaction.donation-transaction': ApiDonationTransactionDonationTransaction;
-      'api::donation.donation': ApiDonationDonation;
       'api::faq.faq': ApiFaqFaq;
       'api::financial-report.financial-report': ApiFinancialReportFinancialReport;
       'api::global.global': ApiGlobalGlobal;
       'api::impact-stat.impact-stat': ApiImpactStatImpactStat;
+      'api::newsletter-campaign.newsletter-campaign': ApiNewsletterCampaignNewsletterCampaign;
       'api::newsletter-subscriber.newsletter-subscriber': ApiNewsletterSubscriberNewsletterSubscriber;
       'api::partner.partner': ApiPartnerPartner;
       'api::project.project': ApiProjectProject;

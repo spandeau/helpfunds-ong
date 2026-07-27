@@ -1,4 +1,4 @@
-﻿export const SITE_NAME = "Help Funds";
+export const SITE_NAME = "Help Funds";
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 export const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
 export const SITE_DESCRIPTION = "Help Funds est une ONG internationale.";
@@ -21,7 +21,7 @@ export const NAV_LINKS: NavLinkItem[] = [
     href: "/projets",
     children: [
       { label: "Projets en cours", href: "/projets" },
-      { label: "Projets termines", href: "/projets/termines" },
+      { label: "Projets termines", href: "/projets?status=termine" },
     ],
   },
   {
@@ -76,7 +76,7 @@ export const FOOTER_LINKS = {
   ],
   projets: [
     { label: "Projets en cours", href: "/projets" },
-    { label: "Projets termines", href: "/projets/termines" },
+    { label: "Projets termines", href: "/projets?status=termine" },
     { label: "Impact", href: "/impact" },
     { label: "Partenaires", href: "/partenaires" },
   ],

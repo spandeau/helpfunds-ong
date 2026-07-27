@@ -6,25 +6,17 @@
     "pluralName": "impact-stats",
     "displayName": "ImpactStat"
   },
-  "options": {
-    "draftAndPublish": true
-  },
+  "options": { "draftAndPublish": true },
   "pluginOptions": {},
   "attributes": {
-    "beneficiaries": {
-      "type": "integer"
+    "label": { "type": "string", "required": true },
+    "value": { "type": "string", "required": true },
+    "description": { "type": "text" },
+    "icon": {
+      "type": "enumeration",
+      "enum": ["users", "folder", "globe", "heart"],
+      "default": "heart"
     },
-    "countries": {
-      "type": "integer"
-    },
-    "projects": {
-      "type": "integer"
-    },
-    "volunteers": {
-      "type": "integer"
-    },
-    "donations": {
-      "type": "integer"
-    }
+    "order": { "type": "integer", "default": 0 }
   }
 }

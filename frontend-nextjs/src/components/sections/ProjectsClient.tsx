@@ -11,7 +11,7 @@ const STATUS_CONFIG = {
   "urgent": { label: "Urgent", color: "bg-red-100 text-red-700", icon: AlertTriangle },
   "en-cours": { label: "En cours", color: "bg-secondary-100 text-secondary-700", icon: Clock },
   "termine": { label: "Termine", color: "bg-neutral-100 text-neutral-600", icon: CheckCircle },
-  "nouveau": { label: "Nouveau", color: "bg-primary-100 text-primary-700", icon: Sparkles },
+  "en-preparation": { label: "En preparation", color: "bg-primary-100 text-primary-700", icon: Sparkles },
 };
 
 const CAT_LABELS: Record<string, string> = {
@@ -166,7 +166,7 @@ export default function ProjectsClient({ projects }: { projects: Project[] }) {
                 <option value="tous">Tous statuts</option>
                 <option value="urgent">Urgent</option>
                 <option value="en-cours">En cours</option>
-                <option value="nouveau">Nouveau</option>
+                <option value="en-preparation">En preparation</option>
                 <option value="termine">Termine</option>
               </select>
               {hasFilters && <button onClick={resetFilters} className="px-3 py-2.5 rounded-xl border-2 border-red-200 text-red-600 text-sm hover:bg-red-50"><X className="w-4 h-4" /></button>}

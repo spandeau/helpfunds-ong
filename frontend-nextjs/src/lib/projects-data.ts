@@ -33,7 +33,7 @@ export interface Project {
   category: string;
   country: string;
   region: string;
-  status: "en-cours" | "urgent" | "termine" | "nouveau";
+  status: "en-cours" | "urgent" | "termine" | "en-preparation";
   featured: boolean;
   goalAmount: number;
   raisedAmount: number;
@@ -247,7 +247,7 @@ export const PROJECTS: Project[] = [
     category: "alimentation",
     country: "Ghana",
     region: "Northern Region",
-    status: "nouveau",
+    status: "en-preparation",
     featured: false,
     goalAmount: 35000,
     raisedAmount: 8000,

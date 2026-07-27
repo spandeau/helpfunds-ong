@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Heart, Globe, Users, TrendingUp, Award, ArrowRight, CheckCircle, Target } from "lucide-react";
+import DonationCTASection from "@/components/sections/DonationCTASection";
 
 export const metadata = {
   title: "A propos — Help Funds",
@@ -182,8 +183,10 @@ export default function AProposPage() {
               Nous contacter <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
-        </div>
+         </div>
       </section>
+
+      <DonationCTASection />
     </main>
   );
 }

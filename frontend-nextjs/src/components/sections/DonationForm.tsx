@@ -128,20 +128,22 @@ export default function DonationForm() {
   const [submitted, setSubmitted] = useState(false);
   const [clientSecret, setClientSecret] = useState("");
   const [loadingStripe, setLoadingStripe] = useState(false);
+  const [paymentError, setPaymentError] = useState("");
 
   const finalAmount = Number(customAmount) || 0;
+  const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [step]);
 
   const handleCloseSuccessModal = () => {
-    // Reset complet : le formulaire est prêt pour un nouveau don
     setSubmitted(false);
     setStep(1);
     setPaymentMethod(null);
     setShowPaymentModal(false);
     setClientSecret("");
+    setPaymentError("");
     setFormData({ firstName: "", lastName: "", email: "", message: "" });
     setMobileData({ phone: "", operator: "mtn" });
     setAnonymous(false);
@@ -151,6 +153,13 @@ export default function DonationForm() {
   };
 
   const handlePaymentChoice = async (method: "stripe" | "mobile_money") => {
+    setPaymentError("");
+
+    if (method === "stripe" && !isValidEmail) {
+      setPaymentError("Merci de saisir une adresse email valide avant de continuer.");
+      return;
+    }
+
     setPaymentMethod(method);
     setShowPaymentModal(false);
 
@@ -177,9 +186,14 @@ export default function DonationForm() {
         if (data.clientSecret) {
           setClientSecret(data.clientSecret);
           setStep(3);
+        } else {
+          setShowPaymentModal(true);
+          setPaymentError(data.error || "Impossible de demarrer le paiement. Verifiez vos informations et reessayez.");
         }
       } catch (error) {
         console.error("Erreur Stripe:", error);
+        setShowPaymentModal(true);
+        setPaymentError("Une erreur est survenue. Verifiez votre connexion et reessayez.");
       } finally {
         setLoadingStripe(false);
       }
@@ -246,6 +260,12 @@ export default function DonationForm() {
               {donationType === "mensuel" ? "/mois" : ""}
             </p>
 
+            {paymentError && (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-3 mb-4">
+                <p className="text-red-600 text-xs font-medium">{paymentError}</p>
+              </div>
+            )}
+
             <div className="space-y-3 mb-6">
               {/* Stripe - Carte bancaire */}
               <button
@@ -298,7 +318,7 @@ export default function DonationForm() {
         </div>
       )}
 
-      <section className="py-16 bg-white">
+      <section className="pt-28 pb-16 bg-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Steps */}
           <div className="flex items-center justify-center gap-4 mb-12">

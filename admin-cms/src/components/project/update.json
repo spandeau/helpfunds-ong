@@ -1,0 +1,13 @@
+{
+  "collectionName": "components_project_updates_v2",
+  "info": {
+    "displayName": "Update",
+    "icon": "pencil"
+  },
+  "options": {},
+  "attributes": {
+    "date": { "type": "string", "required": true },
+    "title": { "type": "string", "required": true },
+    "content": { "type": "text", "required": true }
+  }
+}

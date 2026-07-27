@@ -11,7 +11,7 @@ const STATUS_CONFIG = {
   "urgent": { label: "Urgent", color: "bg-red-100 text-red-700", dot: "bg-red-500", icon: AlertTriangle },
   "en-cours": { label: "En cours", color: "bg-secondary-100 text-secondary-700", dot: "bg-secondary-500", icon: Clock },
   "termine": { label: "Termine", color: "bg-neutral-100 text-neutral-600", dot: "bg-neutral-400", icon: CheckCircle },
-  "nouveau": { label: "Nouveau", color: "bg-primary-100 text-primary-700", dot: "bg-primary-500", icon: Sparkles },
+  "en-preparation": { label: "En preparation", color: "bg-primary-100 text-primary-700", dot: "bg-primary-500", icon: Sparkles },
 };
 
 const CAT_LABELS: Record<string, string> = {
@@ -108,7 +108,7 @@ export default function ProjectsPage() {
                 <option value="tous">Tous statuts</option>
                 <option value="urgent">Urgent</option>
                 <option value="en-cours">En cours</option>
-                <option value="nouveau">Nouveau</option>
+                <option value="en-preparation">En preparation</option>
                 <option value="termine">Termine</option>
               </select>
               {hasFilters && (

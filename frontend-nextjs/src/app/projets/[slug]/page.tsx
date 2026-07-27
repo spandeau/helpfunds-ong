@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -30,7 +30,7 @@ const STATUS_CONFIG = {
   urgent: { label: "Urgent", color: "bg-red-100 text-red-700", icon: AlertTriangle },
   "en-cours": { label: "En cours", color: "bg-secondary-100 text-secondary-700", icon: Clock },
   termine: { label: "Termine", color: "bg-neutral-100 text-neutral-600", icon: CheckCircle },
-  nouveau: { label: "En cours", color: "bg-secondary-100 text-secondary-700", icon: Sparkles },
+  "en-preparation": { label: "En preparation", color: "bg-primary-100 text-primary-700", icon: Sparkles },
 };
 
 const CAT_LABELS: Record<string, string> = {
@@ -52,7 +52,7 @@ export default async function ProjetDetailPage(
 
   const progress = Math.min(Math.round((project.raisedAmount / project.goalAmount) * 100), 100);
   const remaining = project.goalAmount - project.raisedAmount;
-  const status = STATUS_CONFIG[project.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG["nouveau"];
+  const status = STATUS_CONFIG[project.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG["en-preparation"];
   const StatusIcon = status.icon;
   const relatedProjects = PROJECTS.filter((p) => p.slug !== slug && p.category === project.category).slice(0, 3);
 

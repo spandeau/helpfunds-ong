@@ -1,0 +1,13 @@
+{
+  "collectionName": "components_shared_budget_items",
+  "info": {
+    "displayName": "Budget Item",
+    "icon": "chartPie"
+  },
+  "options": {},
+  "attributes": {
+    "label": { "type": "string", "required": true },
+    "percentage": { "type": "integer", "min": 0, "max": 100, "required": true },
+    "color": { "type": "string", "default": "#2563eb" }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "collectionName": "components_project_milestones_v2",
+  "info": {
+    "displayName": "Milestone",
+    "icon": "calendar"
+  },
+  "options": {},
+  "attributes": {
+    "date": { "type": "string", "required": true },
+    "title": { "type": "string", "required": true },
+    "description": { "type": "text" },
+    "done": { "type": "boolean", "default": false }
+  }
+}

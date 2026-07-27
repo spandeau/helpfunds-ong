@@ -6,9 +6,16 @@
     "pluralName": "partners",
     "displayName": "Partner"
   },
-  "options": {
-    "draftAndPublish": true
-  },
+  "options": { "draftAndPublish": true },
   "pluginOptions": {},
-  "attributes": {}
+  "attributes": {
+    "name": { "type": "string", "required": true },
+    "website": { "type": "string" },
+    "logo": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
+    "order": { "type": "integer", "default": 0 }
+  }
 }

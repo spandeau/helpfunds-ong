@@ -17,7 +17,43 @@ const GUARANTEES = [
   { icon: Heart, text: "Impact visible et mesurable" },
 ];
 
-export default function DonationCTASection() {
+interface RecentDonation {
+  name: string;
+  amount: number;
+  createdAt: string;
+}
+
+function timeAgo(dateString: string): string {
+  const diffMs = Date.now() - new Date(dateString).getTime();
+  const minutes = Math.floor(diffMs / 60000);
+  if (minutes < 1) return "a l instant";
+  if (minutes < 60) return `il y a ${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `il y a ${hours}h`;
+  const days = Math.floor(hours / 24);
+  return `il y a ${days}j`;
+}
+
+async function getRecentDonations(): Promise<RecentDonation[]> {
+  try {
+    const strapiUrl = process.env.STRAPI_URL || process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+    const response = await fetch(strapiUrl + "/api/donation-transactions/recent-public", {
+      next: { revalidate: 60 },
+    });
+    if (!response.ok) {
+      throw new Error("Strapi status " + response.status);
+    }
+    const result = (await response.json()) as { data: RecentDonation[] };
+    return result?.data || [];
+  } catch (error) {
+    console.warn("[DonationCTA] Dons recents indisponibles", error);
+    return [];
+  }
+}
+
+export default async function DonationCTASection() {
+  const recentDonations = await getRecentDonations();
+
   return (
     <section className="py-16 bg-neutral-50 border-t border-neutral-100">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -109,26 +145,28 @@ export default function DonationCTASection() {
               <p className="text-xs text-neutral-400 font-semibold uppercase tracking-wider mb-3">
                 Dons recents
               </p>
-              <div className="space-y-3">
-                {[
-                  { name: "Marie D.", amount: 50, time: "il y a 2 min" },
-                  { name: "Anonyme", amount: 100, time: "il y a 5 min" },
-                  { name: "Pierre M.", amount: 25, time: "il y a 12 min" },
-                ].map((donor, i) => (
-                  <div key={i} className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 bg-neutral-100 rounded-full flex items-center justify-center text-neutral-600 font-bold text-xs">
-                        {donor.name[0]}
+              {recentDonations.length > 0 ? (
+                <div className="space-y-3">
+                  {recentDonations.map((donor, i) => (
+                    <div key={i} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 bg-neutral-100 rounded-full flex items-center justify-center text-neutral-600 font-bold text-xs">
+                          {donor.name[0]}
+                        </div>
+                        <div>
+                          <p className="text-neutral-800 text-xs font-medium">{donor.name}</p>
+                          <p className="text-neutral-400 text-[10px]">{timeAgo(donor.createdAt)}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-neutral-800 text-xs font-medium">{donor.name}</p>
-                        <p className="text-neutral-400 text-[10px]">{donor.time}</p>
-                      </div>
+                      <span className="text-primary-600 font-bold text-sm">{donor.amount}€</span>
                     </div>
-                    <span className="text-primary-600 font-bold text-sm">{donor.amount}€</span>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-neutral-400 text-xs leading-relaxed">
+                  Soyez parmi les premiers a soutenir nos projets aujourd hui.
+                </p>
+              )}
             </div>
 
             <Link
