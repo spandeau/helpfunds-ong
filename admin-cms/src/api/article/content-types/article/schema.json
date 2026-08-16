@@ -29,6 +29,7 @@
     "country": { "type": "string" },
     "eventDate": { "type": "datetime" },
     "eventLocation": { "type": "string" },
+    "scheduledAt": { "type": "datetime" },
     "seo": {
       "type": "component",
       "repeatable": false,

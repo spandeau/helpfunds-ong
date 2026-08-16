@@ -7,7 +7,6 @@ interface Partner {
   id: number;
   name: string;
   website?: string;
-  description?: string;
   logo?: { url: string } | null;
   order?: number;
 }
@@ -19,10 +18,8 @@ function PartnerLogo({ partner, strapiUrl }: { partner: Partner; strapiUrl: stri
       : `${strapiUrl}${partner.logo.url}`
     : null;
 
-  const tileClass = "flex-shrink-0 mx-4 flex flex-col items-center justify-center gap-2 w-36 h-28 px-4 py-3 bg-white rounded-2xl border border-neutral-100 hover:border-primary-200 hover:shadow-md transition-all duration-300 group";
-
-  const content = (
-    <>
+  return (
+    <div className="flex-shrink-0 mx-4 flex flex-col items-center justify-center gap-2 w-36 h-28 px-4 py-3 bg-white rounded-2xl border border-neutral-100 hover:border-primary-200 hover:shadow-md transition-all duration-300 group">
       {logoUrl ? (
         <Image
           src={logoUrl}
@@ -39,25 +36,9 @@ function PartnerLogo({ partner, strapiUrl }: { partner: Partner; strapiUrl: stri
       <span className="text-neutral-500 text-xs font-medium text-center group-hover:text-primary-600 transition-colors truncate w-full">
         {partner.name}
       </span>
-    </>
-  );
-
-  if (partner.website) {
-    return (
-      <a href={partner.website} target="_blank" rel="noopener noreferrer" className={tileClass} title={partner.description || partner.name}>
-        {content}
-      </a>
-    );
-  }
-
-  return (
-    <div className={tileClass} title={partner.description || partner.name}>
-      {content}
     </div>
   );
 }
-
-const MIN_TILES = 12;
 
 export default function PartnersSection() {
   const [partners, setPartners] = useState<Partner[]>([]);
@@ -80,12 +61,7 @@ export default function PartnersSection() {
     return null;
   }
 
-  const repeatCount = partners.length > 0 ? Math.max(1, Math.ceil(MIN_TILES / partners.length)) : 1;
-  const tiled = Array.from(
-    { length: partners.length * repeatCount },
-    (_, i) => partners[i % partners.length]
-  );
-  const doubled = [...tiled, ...tiled];
+  const doubled = [...partners, ...partners];
 
   return (
     <section className="py-16 bg-white border-t border-neutral-100">

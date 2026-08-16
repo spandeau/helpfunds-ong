@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createPendingDonationTransaction } from "@/lib/donations";
+import { strapiClient } from "@/services/strapi";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2026-06-24.dahlia",
@@ -19,6 +20,7 @@ export async function POST(request: NextRequest) {
       donationType,
       anonymous,
       message,
+      campaignSlug,
     } = await request.json();
 
     if (!amount || amount < 1) {
@@ -35,12 +37,26 @@ export async function POST(request: NextRequest) {
         project: project || "general",
         donationType: donationType || "unique",
         source: "helpfunds-website",
+        campaignSlug: campaignSlug || "",
       },
       description: `Don Help Funds — ${project || "general"} — ${donationType || "unique"}`,
       receipt_email: email || undefined,
     });
 
-    // Enregistrement en attente dans Strapi — best effort, ne bloque jamais le paiement
+    let campaignId: string | undefined;
+    if (campaignSlug) {
+      try {
+        const campaign = await strapiClient.findOneByField<{ documentId: string }>(
+          "donation-campaigns",
+          "slug",
+          campaignSlug
+        );
+        if (campaign) campaignId = campaign.documentId;
+      } catch (error) {
+        console.warn("[create-payment-intent] Cagnotte introuvable pour slug", campaignSlug, error);
+      }
+    }
+
     await createPendingDonationTransaction({
       paymentIntentId: paymentIntent.id,
       amount,
@@ -52,6 +68,7 @@ export async function POST(request: NextRequest) {
       message,
       isRecurring: donationType === "mensuel",
       projectCategory: project,
+      campaignId,
     });
 
     return NextResponse.json({

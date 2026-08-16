@@ -13,7 +13,7 @@ import Logo from "@/components/ui/Logo";
 import {
   Heart, User, Mail, MessageSquare, CreditCard,
   Repeat, Gift, Check, ChevronLeft, ChevronRight,
-  Shield, ArrowRight, Smartphone, X, Lock, HeartHandshake
+  Shield, ArrowRight, Smartphone, X, Lock, HeartHandshake, Target
 } from "lucide-react";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
@@ -115,7 +115,14 @@ type Step = 1 | 2 | 3;
 type DonationType = "unique" | "mensuel";
 type PaymentMethod = "stripe" | "mobile_money" | null;
 
-export default function DonationForm() {
+interface CampaignInfo {
+  slug: string;
+  title: string;
+  goalAmount: number;
+  raisedAmount: number;
+}
+
+export default function DonationForm({ campaign }: { campaign?: CampaignInfo | null }) {
   const [step, setStep] = useState<Step>(1);
   const [donationType, setDonationType] = useState<DonationType>("mensuel");
   const [customAmount, setCustomAmount] = useState<string>("100");
@@ -180,6 +187,7 @@ export default function DonationForm() {
             donationType,
             anonymous,
             message: formData.message,
+            campaignSlug: campaign?.slug,
           }),
         });
         const data = await res.json();
@@ -364,8 +372,24 @@ export default function DonationForm() {
                       className="w-full px-4 py-3 pr-12 rounded-xl border-2 border-neutral-200 focus:outline-none focus:border-primary-500 text-lg font-semibold" min="1" />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 font-bold text-lg">€</span>
                   </div>
+                  {campaign && (
+                    <div className="mb-6 bg-primary-50 border-2 border-primary-200 rounded-2xl p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Target className="w-4 h-4 text-primary-600" />
+                        <span className="text-xs font-bold text-primary-700 uppercase tracking-wide">Vous soutenez</span>
+                      </div>
+                      <p className="font-heading font-bold text-neutral-900 text-base mb-2">{campaign.title}</p>
+                      <div className="h-2 bg-white rounded-full overflow-hidden mb-1.5">
+                        <div
+                          className="h-full bg-primary-600 rounded-full"
+                          style={{ width: `${Math.min(Math.round((campaign.raisedAmount / campaign.goalAmount) * 100), 100)}%` }}
+                        />
+                      </div>
+                      <p className="text-xs text-primary-700">{campaign.raisedAmount}€ collectes sur {campaign.goalAmount}€</p>
+                    </div>
+                  )}
                   <div className="flex flex-col gap-2 mb-6">
-                    {PROJECTS.map((project) => (
+                    {!campaign && PROJECTS.map((project) => (
                       <button key={project.value} onClick={() => setSelectedProject(project.value)}
                         className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${selectedProject === project.value ? "border-primary-600 bg-primary-50" : "border-neutral-200 hover:border-neutral-300"}`}>
                         <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${selectedProject === project.value ? "border-primary-600 bg-primary-600" : "border-neutral-300"}`}>

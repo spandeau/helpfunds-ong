@@ -7,10 +7,10 @@
     "displayName": "Partner"
   },
   "options": { "draftAndPublish": true },
-  "pluginOptions": {},
   "attributes": {
     "name": { "type": "string", "required": true },
     "website": { "type": "string" },
+    "description": { "type": "text" },
     "logo": {
       "type": "media",
       "multiple": false,

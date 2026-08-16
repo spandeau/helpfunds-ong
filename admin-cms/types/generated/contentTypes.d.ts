@@ -501,6 +501,7 @@ export interface ApiArticleArticle extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
+    scheduledAt: Schema.Attribute.DateTime;
     seo: Schema.Attribute.Component<'shared.seo', false>;
     slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
     tags: Schema.Attribute.JSON;
@@ -630,9 +631,13 @@ export interface ApiDonationCampaignDonationCampaign
     singularName: 'donation-campaign';
   };
   options: {
-    draftAndPublish: true;
+    draftAndPublish: false;
   };
   attributes: {
+    campaignStatus: Schema.Attribute.Enumeration<
+      ['draft', 'active', 'paused', 'completed', 'cancelled']
+    > &
+      Schema.Attribute.DefaultTo<'draft'>;
     coverImage: Schema.Attribute.Media<'images'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -655,10 +660,6 @@ export interface ApiDonationCampaignDonationCampaign
     raisedAmount: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
     slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
     startDate: Schema.Attribute.Date;
-    status: Schema.Attribute.Enumeration<
-      ['draft', 'active', 'paused', 'completed', 'cancelled']
-    > &
-      Schema.Attribute.DefaultTo<'draft'>;
     suggestedAmounts: Schema.Attribute.JSON;
     title: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
@@ -977,6 +978,7 @@ export interface ApiPartnerPartner extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    description: Schema.Attribute.Text;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -991,6 +993,77 @@ export interface ApiPartnerPartner extends Struct.CollectionTypeSchema {
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     website: Schema.Attribute.String;
+  };
+}
+
+export interface ApiPartnershipRequestPartnershipRequest
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'partnership_requests';
+  info: {
+    displayName: 'Demande Partenariat';
+    pluralName: 'partnership-requests';
+    singularName: 'partnership-request';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    contactName: Schema.Attribute.String & Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    email: Schema.Attribute.Email & Schema.Attribute.Required;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::partnership-request.partnership-request'
+    > &
+      Schema.Attribute.Private;
+    message: Schema.Attribute.Text & Schema.Attribute.Required;
+    organizationName: Schema.Attribute.String & Schema.Attribute.Required;
+    phone: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    status: Schema.Attribute.Enumeration<
+      ['nouveau', 'en-cours', 'accepte', 'refuse']
+    > &
+      Schema.Attribute.DefaultTo<'nouveau'>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    website: Schema.Attribute.String;
+  };
+}
+
+export interface ApiPresentationVideoPresentationVideo
+  extends Struct.SingleTypeSchema {
+  collectionName: 'presentation_video';
+  info: {
+    displayName: 'Video de Presentation';
+    pluralName: 'presentation-videos';
+    singularName: 'presentation-video';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    active: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::presentation-video.presentation-video'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    title: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    videoFile: Schema.Attribute.Media<'videos'>;
+    videoUrl: Schema.Attribute.String;
   };
 }
 
@@ -1703,6 +1776,8 @@ declare module '@strapi/strapi' {
       'api::newsletter-campaign.newsletter-campaign': ApiNewsletterCampaignNewsletterCampaign;
       'api::newsletter-subscriber.newsletter-subscriber': ApiNewsletterSubscriberNewsletterSubscriber;
       'api::partner.partner': ApiPartnerPartner;
+      'api::partnership-request.partnership-request': ApiPartnershipRequestPartnershipRequest;
+      'api::presentation-video.presentation-video': ApiPresentationVideoPresentationVideo;
       'api::project.project': ApiProjectProject;
       'api::slider.slider': ApiSliderSlider;
       'api::team-member.team-member': ApiTeamMemberTeamMember;

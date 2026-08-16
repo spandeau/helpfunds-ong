@@ -24,12 +24,12 @@ const COL2 = [
   { name: "Projets en cours", url: "/projets" },
   { name: "Impact", url: "/impact" },
   { name: "Actualites", url: "/actualites" },
-  { name: "Partenaires", url: "/contact" },
+  { name: "Partenaires", url: "/partenaires" },
 ];
 const COL3 = [
   { name: "Faire un don", url: "/don" },
   { name: "Devenir benevole", url: "/contact" },
-  { name: "Partenariat", url: "/contact" },
+  { name: "Partenariat", url: "/partenaires" },
   { name: "Contact", url: "/contact" },
 ];
 
@@ -207,7 +207,14 @@ export default function Footer() {
             <div className="flex items-center gap-4 text-xs text-neutral-500">
               <Link href="/confidentialite" className="hover:text-primary-400 transition-colors">Confidentialite</Link>
               <Link href="/mentions-legales" className="hover:text-primary-400 transition-colors">Mentions legales</Link>
+              <Link href="/conditions-utilisation" className="hover:text-primary-400 transition-colors">Conditions d utilisation</Link>
+              <Link href="/#faq" className="hover:text-primary-400 transition-colors">FAQ</Link>
             </div>
+          </div>
+          <div className="mt-6 pt-6 border-t border-neutral-800/60 text-center">
+            <p className="text-xs text-neutral-600">
+               <span className="text-neutral-400 font-medium">Warano_Tech</span>
+            </p>
           </div>
         </div>
       </div>

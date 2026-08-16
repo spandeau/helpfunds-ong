@@ -35,6 +35,7 @@
     ".cache/",
     ".tmp/",
     ".strapi/",
+    "public/",
     "src/admin/",
     "**/*.test.*",
     "src/plugins/**"

@@ -1,0 +1,17 @@
+{
+  "kind": "singleType",
+  "collectionName": "presentation_video",
+  "info": {
+    "singularName": "presentation-video",
+    "pluralName": "presentation-videos",
+    "displayName": "Video de Presentation"
+  },
+  "options": { "draftAndPublish": false },
+  "attributes": {
+    "title": { "type": "string" },
+    "description": { "type": "text" },
+    "videoUrl": { "type": "string" },
+    "videoFile": { "type": "media", "multiple": false, "allowedTypes": ["videos"] },
+    "active": { "type": "boolean", "default": true }
+  }
+}
