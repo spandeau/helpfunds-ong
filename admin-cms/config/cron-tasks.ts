@@ -8,14 +8,20 @@ export default {
         const drafts = await strapi.documents("api::article.article").findMany({
           status: "draft",
           filters: {
-            scheduledAt: { $lte: now },
+            scheduledAt: { $notNull: true, $lte: now },
           },
+          pagination: { pageSize: 100 },
         });
 
         strapi.log.info(`[Cron] ${drafts.length} article(s) a publier trouve(s)`);
 
         for (const article of drafts) {
           try {
+            await strapi.documents("api::article.article").update({
+              documentId: article.documentId,
+              data: { scheduledAt: null },
+            });
+
             await strapi.documents("api::article.article").publish({
               documentId: article.documentId,
             });
