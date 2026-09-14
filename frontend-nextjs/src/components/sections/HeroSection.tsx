@@ -17,45 +17,47 @@ import {
 
 import { HOME_STATS } from "@/constants";
 
-const SLIDES = [
+interface Slide {
+  id: number | string;
+  badge: string;
+  title: string;
+  description: string;
+  image: string;
+  cta: string;
+  ctaHref: string;
+  stat: { value: string; label: string };
+}
+
+const DEFAULT_SLIDES: Slide[] = [
   {
     id: 1,
     badge: "Education — Nigeria",
-    title: "300 enfants ont",
-    titleAccent: "retrouve le chemin",
-    titleEnd: "de l ecole",
+    title: "300 enfants ont retrouve le chemin de l ecole",
     description: "Construction d une ecole primaire complete dans la region de Kano.",
     image: "https://images.unsplash.com/photo-1497486751825-1233686d5d80?w=1920&q=80",
     cta: "Voir le projet",
     ctaHref: "/projets",
     stat: { value: "300", label: "enfants scolarises" },
-    accent: "text-secondary-400",
   },
   {
     id: 2,
     badge: "Eau — Mali",
-    title: "2 500 personnes ont",
-    titleAccent: "acces a l eau",
-    titleEnd: "potable",
+    title: "2 500 personnes ont acces a l eau potable",
     description: "Installation de 12 points d eau dans plusieurs villages.",
     image: "https://images.unsplash.com/photo-1541544537156-7627a7a4aa1c?w=1920&q=80",
     cta: "Decouvrir",
     ctaHref: "/projets",
     stat: { value: "12", label: "points installes" },
-    accent: "text-blue-300",
   },
   {
     id: 3,
     badge: "Impact Global",
-    title: "35 pays",
-    titleAccent: "une seule",
-    titleEnd: "mission",
+    title: "35 pays, une seule mission",
     description: "Nous agissons pour creer un changement durable.",
     image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=1920&q=80",
     cta: "Notre impact",
     ctaHref: "/projets",
     stat: { value: "35", label: "pays" },
-    accent: "text-secondary-400",
   },
 ];
 
@@ -67,14 +69,51 @@ const iconMap = {
 };
 
 export default function HeroSection() {
+  const [slides, setSlides] = useState<Slide[]>(DEFAULT_SLIDES);
   const [index, setIndex] = useState(0);
   const [offsetY, setOffsetY] = useState(0);
   const heroRef = useRef<HTMLElement>(null);
+
+  const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+
+  useEffect(() => {
+    fetch(`${STRAPI_URL}/api/sliders?populate[image]=true&sort=order:asc&filters[active][$eq]=true`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!data?.data || data.data.length === 0) return;
+
+        const fromStrapi: Slide[] = data.data.map((item: any, i: number) => {
+          const imageUrl = item.image?.[0]?.url
+            ? item.image[0].url.startsWith("http")
+              ? item.image[0].url
+              : `${STRAPI_URL}${item.image[0].url}`
+            : DEFAULT_SLIDES[i % DEFAULT_SLIDES.length].image;
+
+          return {
+            id: item.id,
+            badge: item.subtitle || "",
+            title: item.title || "",
+            description: item.description || "",
+            image: imageUrl,
+            cta: item.buttonText || "Decouvrir",
+            ctaHref: item.buttonLink || "/projets",
+            stat: { value: item.statValue || "", label: item.statLabel || "" },
+          };
+        });
+
+        setSlides(fromStrapi);
+      })
+      .catch(() => {});
+  }, [STRAPI_URL]);
 
   const [emblaRef, embla] = useEmblaCarousel(
     { loop: true, align: "start" },
     [Autoplay({ delay: 5500, stopOnInteraction: false })]
   );
+
+  useEffect(() => {
+    embla?.reInit();
+  }, [slides, embla]);
 
   const previous = useCallback(() => embla?.scrollPrev(), [embla]);
   const next = useCallback(() => embla?.scrollNext(), [embla]);
@@ -93,7 +132,6 @@ export default function HeroSection() {
     };
   }, [embla, select]);
 
-  // Effet parallaxe au scroll
   useEffect(() => {
     const handleScroll = () => {
       if (!heroRef.current) return;
@@ -111,7 +149,7 @@ export default function HeroSection() {
       <section ref={heroRef} className="relative h-[90vh] md:h-screen overflow-hidden">
         <div ref={emblaRef} className="overflow-hidden h-full">
           <div className="flex h-full">
-            {SLIDES.map((slide) => (
+            {slides.map((slide) => (
               <div key={slide.id} className="relative min-w-0 flex-[0_0_100%] h-full">
                 <div
                   className="absolute inset-0 hero-parallax"
@@ -129,7 +167,6 @@ export default function HeroSection() {
 
                 <div className="absolute inset-0 bg-gradient-to-b from-primary-950/70 via-primary-950/60 to-primary-950/85" />
 
-                {/* Logo watermark en arriere-plan */}
                 <div className="absolute inset-0 flex items-center justify-end overflow-hidden pointer-events-none select-none">
                   <Image
                     src="/logo.png"
@@ -144,13 +181,14 @@ export default function HeroSection() {
                 <div className="absolute inset-0">
                   <div className="max-w-7xl mx-auto h-full flex items-center px-6">
                     <div className="max-w-3xl pt-24">
-                      <div className="inline-flex rounded-full bg-white/10 backdrop-blur px-4 py-2 text-white text-sm mb-6 border border-white/20">
-                        {slide.badge}
-                      </div>
+                      {slide.badge && (
+                        <div className="inline-flex rounded-full bg-white/10 backdrop-blur px-4 py-2 text-white text-sm mb-6 border border-white/20">
+                          {slide.badge}
+                        </div>
+                      )}
 
                       <h1 className="text-white font-heading font-bold leading-tight text-4xl sm:text-5xl lg:text-7xl mb-6">
                         {slide.title}
-                        <span className={slide.accent}> {slide.titleAccent}</span> {slide.titleEnd}
                       </h1>
 
                       <p className="text-white/85 text-base sm:text-xl max-w-2xl mb-8">
@@ -166,23 +204,27 @@ export default function HeroSection() {
                           Faire un don
                         </Link>
 
-                        <Link
-                          href={slide.ctaHref}
-                          className="px-8 py-4 rounded-2xl bg-white/15 backdrop-blur border border-white/20 text-white inline-flex items-center gap-2 hover:scale-105 hover:bg-white/25 transition-all"
-                        >
-                          {slide.cta}
-                          <ArrowRight size={18} />
-                        </Link>
+                        {slide.cta && (
+                          <Link
+                            href={slide.ctaHref}
+                            className="px-8 py-4 rounded-2xl bg-white/15 backdrop-blur border border-white/20 text-white inline-flex items-center gap-2 hover:scale-105 hover:bg-white/25 transition-all"
+                          >
+                            {slide.cta}
+                            <ArrowRight size={18} />
+                          </Link>
+                        )}
                       </div>
 
-                      <div className="mt-10 inline-flex items-center gap-5 bg-white/10 rounded-2xl px-6 py-4 backdrop-blur border border-white/10">
-                        <div>
-                          <div className="text-white font-heading text-4xl font-bold tabular-nums">
-                            {slide.stat.value}
+                      {slide.stat.value && (
+                        <div className="mt-10 inline-flex items-center gap-5 bg-white/10 rounded-2xl px-6 py-4 backdrop-blur border border-white/10">
+                          <div>
+                            <div className="text-white font-heading text-4xl font-bold tabular-nums">
+                              {slide.stat.value}
+                            </div>
+                            <div className="text-white/70">{slide.stat.label}</div>
                           </div>
-                          <div className="text-white/70">{slide.stat.label}</div>
                         </div>
-                      </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -208,7 +250,7 @@ export default function HeroSection() {
         </button>
 
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
-          {SLIDES.map((_, i) => (
+          {slides.map((_, i) => (
             <button
               key={i}
               onClick={() => embla?.scrollTo(i)}

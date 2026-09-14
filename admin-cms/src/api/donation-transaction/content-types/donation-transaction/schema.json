@@ -18,7 +18,7 @@
     },
     "paymentMethod": {
       "type": "enumeration",
-      "enum": ["stripe", "paypal", "card", "bank_transfer", "other"],
+      "enum": ["stripe", "paypal", "paydunya", "card", "bank_transfer", "other"],
       "default": "stripe"
     },
     "paymentIntentId": { "type": "string" },

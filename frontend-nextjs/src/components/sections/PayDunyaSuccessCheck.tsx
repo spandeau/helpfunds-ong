@@ -1,34 +1,50 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Check, Heart, FileText, ArrowRight, Clock, AlertTriangle } from "lucide-react";
-import PayDunyaSuccessCheck from "@/components/sections/PayDunyaSuccessCheck";
+import { Check, Heart, FileText, ArrowRight, Clock, AlertTriangle, Loader2 } from "lucide-react";
 
-export const metadata = {
-  title: "Don confirme — Help Funds",
-  description: "Merci pour votre don a Help Funds.",
-};
+type VerifyStatus = "checking" | "completed" | "pending" | "failed" | "cancelled" | "unknown";
 
-type RedirectStatus = "succeeded" | "processing" | "failed" | undefined;
+export default function PayDunyaSuccessCheck({ reference: urlReference }: { reference?: string }) {
+  const [status, setStatus] = useState<VerifyStatus>("checking");
 
-export default async function DonSuccesPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}) {
-  const params = await searchParams;
+  useEffect(() => {
+    const reference = urlReference || sessionStorage.getItem("paydunya_pending_reference");
 
-  const rawProvider = params.provider;
-  const provider = Array.isArray(rawProvider) ? rawProvider[0] : rawProvider;
+    if (!reference) {
+      setStatus("unknown");
+      return;
+    }
 
-  if (provider === "paydunya") {
-    const rawToken = params.token;
-    const token = Array.isArray(rawToken) ? rawToken[0] : rawToken;
-    return <PayDunyaSuccessCheck reference={token} />;
+    fetch(`/api/donations/paydunya/verify?reference=${encodeURIComponent(reference)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setStatus((data.status as VerifyStatus) || "unknown");
+        sessionStorage.removeItem("paydunya_pending_reference");
+      })
+      .catch(() => setStatus("unknown"));
+  }, [urlReference]);
+
+  if (status === "checking") {
+    return (
+      <main className="min-h-screen bg-neutral-50 flex items-center justify-center pt-20">
+        <div className="max-w-lg mx-auto px-4 text-center">
+          <div className="w-24 h-24 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-8">
+            <Loader2 className="w-12 h-12 text-orange-600 animate-spin" />
+          </div>
+          <h1 className="font-heading font-bold text-neutral-900 text-3xl md:text-4xl mb-4">
+            Verification de votre paiement...
+          </h1>
+          <p className="text-neutral-500 text-lg">
+            Un instant, nous confirmons votre don aupres de PayDunya.
+          </p>
+        </div>
+      </main>
+    );
   }
 
-  const raw = params.redirect_status;
-  const redirectStatus = (Array.isArray(raw) ? raw[0] : raw) as RedirectStatus;
-
-  if (redirectStatus === "failed") {
+  if (status === "failed" || status === "cancelled") {
     return (
       <main className="min-h-screen bg-neutral-50 flex items-center justify-center pt-20">
         <div className="max-w-lg mx-auto px-4 text-center">
@@ -36,10 +52,10 @@ export default async function DonSuccesPage({
             <AlertTriangle className="w-12 h-12 text-red-600" />
           </div>
           <h1 className="font-heading font-bold text-neutral-900 text-3xl md:text-4xl mb-4">
-            Le paiement n a pas abouti
+            {status === "cancelled" ? "Paiement annule" : "Le paiement n a pas abouti"}
           </h1>
           <p className="text-neutral-500 text-lg mb-8">
-            Votre banque a refuse ou annule la transaction. Aucun montant n a ete preleve. Vous pouvez reessayer avec un autre moyen de paiement.
+            Aucun montant n a ete preleve. Vous pouvez reessayer avec un autre moyen de paiement.
           </p>
           <Link href="/don" className="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-bold px-6 py-3 rounded-xl transition-all">
             Reessayer <ArrowRight className="w-4 h-4" />
@@ -49,7 +65,7 @@ export default async function DonSuccesPage({
     );
   }
 
-  if (redirectStatus === "processing") {
+  if (status === "pending") {
     return (
       <main className="min-h-screen bg-neutral-50 flex items-center justify-center pt-20">
         <div className="max-w-lg mx-auto px-4 text-center">
@@ -60,7 +76,7 @@ export default async function DonSuccesPage({
             Votre don est en cours de traitement
           </h1>
           <p className="text-neutral-500 text-lg mb-8">
-            Le paiement (SEPA ou virement) peut prendre quelques jours a se confirmer. Vous recevrez un email des que votre don sera valide.
+            La confirmation Mobile Money peut prendre quelques instants. Vous recevrez un email des que votre don sera valide.
           </p>
           <Link href="/" className="inline-flex items-center gap-2 bg-secondary-600 hover:bg-secondary-700 text-white font-bold px-6 py-3 rounded-xl transition-all">
             <Heart className="w-4 h-4 fill-white" />Accueil
@@ -70,7 +86,7 @@ export default async function DonSuccesPage({
     );
   }
 
-  if (redirectStatus !== "succeeded") {
+  if (status === "unknown") {
     return (
       <main className="min-h-screen bg-neutral-50 flex items-center justify-center pt-20">
         <div className="max-w-lg mx-auto px-4 text-center">

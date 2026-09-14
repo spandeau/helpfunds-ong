@@ -708,7 +708,7 @@ export interface ApiDonationTransactionDonationTransaction
     metadata: Schema.Attribute.JSON;
     paymentIntentId: Schema.Attribute.String;
     paymentMethod: Schema.Attribute.Enumeration<
-      ['stripe', 'paypal', 'card', 'bank_transfer', 'other']
+      ['stripe', 'paypal', 'paydunya', 'card', 'bank_transfer', 'other']
     > &
       Schema.Attribute.DefaultTo<'stripe'>;
     paymentStatus: Schema.Attribute.Enumeration<
@@ -913,10 +913,10 @@ export interface ApiNewsletterCampaignNewsletterCampaign
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
     recipientCount: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
-    sentAt: Schema.Attribute.DateTime;
-    status: Schema.Attribute.Enumeration<['brouillon', 'envoyee']> &
+    sendStatus: Schema.Attribute.Enumeration<['brouillon', 'envoyee']> &
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'brouillon'>;
+    sentAt: Schema.Attribute.DateTime;
     subject: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -1023,7 +1023,7 @@ export interface ApiPartnershipRequestPartnershipRequest
     organizationName: Schema.Attribute.String & Schema.Attribute.Required;
     phone: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
-    status: Schema.Attribute.Enumeration<
+    requestStatus: Schema.Attribute.Enumeration<
       ['nouveau', 'en-cours', 'accepte', 'refuse']
     > &
       Schema.Attribute.DefaultTo<'nouveau'>;

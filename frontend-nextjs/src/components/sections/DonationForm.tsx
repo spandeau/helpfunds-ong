@@ -131,13 +131,16 @@ export default function DonationForm({ campaign }: { campaign?: CampaignInfo | n
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [formData, setFormData] = useState({ firstName: "", lastName: "", email: "", message: "" });
-  const [mobileData, setMobileData] = useState({ phone: "", operator: "mtn" });
   const [submitted, setSubmitted] = useState(false);
   const [clientSecret, setClientSecret] = useState("");
   const [loadingStripe, setLoadingStripe] = useState(false);
+  const [loadingPayDunya, setLoadingPayDunya] = useState(false);
   const [paymentError, setPaymentError] = useState("");
 
   const finalAmount = Number(customAmount) || 0;
+  // XOF est arrime a taux fixe sur l'euro (1 EUR = 655.957 FCFA) - utilise pour PayDunya,
+  // le reste du site continue d'afficher des euros.
+  const fcfaAmount = Math.round(finalAmount * 655.957);
   const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email);
 
   useEffect(() => {
@@ -152,7 +155,6 @@ export default function DonationForm({ campaign }: { campaign?: CampaignInfo | n
     setClientSecret("");
     setPaymentError("");
     setFormData({ firstName: "", lastName: "", email: "", message: "" });
-    setMobileData({ phone: "", operator: "mtn" });
     setAnonymous(false);
     setSelectedProject("general");
     setDonationType("mensuel");
@@ -162,7 +164,7 @@ export default function DonationForm({ campaign }: { campaign?: CampaignInfo | n
   const handlePaymentChoice = async (method: "stripe" | "mobile_money") => {
     setPaymentError("");
 
-    if (method === "stripe" && !isValidEmail) {
+    if (!isValidEmail) {
       setPaymentError("Merci de saisir une adresse email valide avant de continuer.");
       return;
     }
@@ -206,7 +208,38 @@ export default function DonationForm({ campaign }: { campaign?: CampaignInfo | n
         setLoadingStripe(false);
       }
     } else {
-      setStep(3);
+      setLoadingPayDunya(true);
+      try {
+        const res = await fetch("/api/donations/paydunya/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            amount: fcfaAmount,
+            currency: "XOF",
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            project: selectedProject,
+            donationType,
+            anonymous,
+            message: formData.message,
+            campaignSlug: campaign?.slug,
+          }),
+        });
+        const data = await res.json();
+        if (data.redirectUrl) {
+          window.location.href = data.redirectUrl;
+        } else {
+          setShowPaymentModal(true);
+          setPaymentError(data.error || "Impossible de demarrer le paiement. Verifiez vos informations et reessayez.");
+        }
+      } catch (error) {
+        console.error("Erreur PayDunya:", error);
+        setShowPaymentModal(true);
+        setPaymentError("Une erreur est survenue. Verifiez votre connexion et reessayez.");
+      } finally {
+        setLoadingPayDunya(false);
+      }
     }
   };
 
@@ -275,6 +308,38 @@ export default function DonationForm({ campaign }: { campaign?: CampaignInfo | n
             )}
 
             <div className="space-y-3 mb-6">
+              {/* Mobile Money via PayDunya - mis en avant */}
+              <button
+                onClick={() => handlePaymentChoice("mobile_money")}
+                disabled={loadingPayDunya}
+                className="w-full relative flex items-center gap-4 p-4 rounded-2xl border-2 border-orange-300 bg-orange-50/50 hover:border-orange-400 hover:bg-orange-50 transition-all group disabled:opacity-50"
+              >
+                <span className="absolute -top-2.5 left-4 bg-orange-500 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                  Recommande
+                </span>
+                <div className="w-14 h-14 bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md group-hover:scale-105 transition-transform">
+                  <Smartphone className="w-7 h-7 text-white" />
+                </div>
+                <div className="text-left flex-1">
+                  <p className="font-bold text-neutral-900">Mobile Money</p>
+                  <p className="text-xs text-orange-600 font-semibold mt-0.5">
+                    ≈ {fcfaAmount.toLocaleString("fr-FR")} FCFA
+                  </p>
+                  <div className="flex items-center gap-1.5 mt-1.5">
+                    {MOBILE_OPERATORS.map((op) => (
+                      <div key={op.value} className={`${op.color} rounded px-1.5 py-0.5`}>
+                        <span className={`text-[9px] font-black ${op.textColor}`}>{op.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {loadingPayDunya ? (
+                  <div className="w-5 h-5 border-2 border-orange-300 border-t-orange-600 rounded-full animate-spin" />
+                ) : (
+                  <ArrowRight className="w-5 h-5 text-neutral-300 group-hover:text-orange-500 transition-colors" />
+                )}
+              </button>
+
               {/* Stripe - Carte bancaire */}
               <button
                 onClick={() => handlePaymentChoice("stripe")}
@@ -293,27 +358,6 @@ export default function DonationForm({ campaign }: { campaign?: CampaignInfo | n
                 ) : (
                   <ArrowRight className="w-5 h-5 text-neutral-300 group-hover:text-primary-500 transition-colors" />
                 )}
-              </button>
-
-              {/* Mobile Money */}
-              <button
-                onClick={() => handlePaymentChoice("mobile_money")}
-                className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-neutral-100 hover:border-orange-400 hover:bg-orange-50 transition-all group"
-              >
-                <div className="w-14 h-14 bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md group-hover:scale-105 transition-transform">
-                  <Smartphone className="w-7 h-7 text-white" />
-                </div>
-                <div className="text-left flex-1">
-                  <p className="font-bold text-neutral-900">Mobile Money</p>
-                  <div className="flex items-center gap-1.5 mt-1">
-                    {MOBILE_OPERATORS.map((op) => (
-                      <div key={op.value} className={`${op.color} rounded px-1.5 py-0.5`}>
-                        <span className={`text-[9px] font-black ${op.textColor}`}>{op.label}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <ArrowRight className="w-5 h-5 text-neutral-300 group-hover:text-orange-500 transition-colors" />
               </button>
             </div>
 
@@ -500,62 +544,6 @@ export default function DonationForm({ campaign }: { campaign?: CampaignInfo | n
                       onSuccess={() => setSubmitted(true)}
                     />
                   </Elements>
-                </div>
-              )}
-
-              {/* STEP 3 - Mobile Money */}
-              {step === 3 && paymentMethod === "mobile_money" && (
-                <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-6 md:p-8">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl flex items-center justify-center shadow-md">
-                      <Smartphone className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h2 className="font-heading font-bold text-neutral-900 text-xl">Mobile Money</h2>
-                      <p className="text-neutral-500 text-sm">Montant : <span className="font-bold text-primary-600">{finalAmount}€</span></p>
-                    </div>
-                  </div>
-                  <div className="space-y-5">
-                    <div>
-                      <label className="block text-sm font-semibold text-neutral-700 mb-3">Choisissez votre operateur</label>
-                      <div className="grid grid-cols-2 gap-3">
-                        {MOBILE_OPERATORS.map((op) => (
-                          <button key={op.value} onClick={() => setMobileData({ ...mobileData, operator: op.value })}
-                            className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${mobileData.operator === op.value ? `${op.border} ring-2 ring-offset-1` : "border-neutral-200 hover:border-neutral-300"}`}>
-                            <div className={`w-10 h-10 ${op.color} rounded-xl flex items-center justify-center flex-shrink-0`}>
-                              <span className={`font-black text-xs ${op.textColor}`}>{op.label}</span>
-                            </div>
-                            <span className="font-semibold text-neutral-800 text-sm">{op.label}</span>
-                            {mobileData.operator === op.value && <Check className="w-4 h-4 text-secondary-600 ml-auto" />}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-neutral-700 mb-1.5">Numero de telephone</label>
-                      <div className="relative">
-                        <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                        <input type="tel" placeholder="+228 XX XX XX XX" value={mobileData.phone} onChange={(e) => setMobileData({ ...mobileData, phone: e.target.value })} className="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-neutral-200 focus:outline-none focus:border-primary-500" />
-                      </div>
-                    </div>
-                    <div className="bg-orange-50 border border-orange-100 rounded-xl p-4">
-                      <p className="text-sm text-orange-800 font-semibold mb-2">Comment ca fonctionne :</p>
-                      <ol className="text-xs text-orange-700 space-y-1.5">
-                        <li className="flex items-center gap-2"><span className="w-5 h-5 bg-orange-200 rounded-full flex items-center justify-center font-bold flex-shrink-0">1</span>Cliquez sur Confirmer le don</li>
-                        <li className="flex items-center gap-2"><span className="w-5 h-5 bg-orange-200 rounded-full flex items-center justify-center font-bold flex-shrink-0">2</span>Vous recevrez une notification sur votre telephone</li>
-                        <li className="flex items-center gap-2"><span className="w-5 h-5 bg-orange-200 rounded-full flex items-center justify-center font-bold flex-shrink-0">3</span>Validez avec votre code secret</li>
-                      </ol>
-                    </div>
-                  </div>
-                  <div className="flex gap-4 mt-8">
-                    <button onClick={() => { setStep(2); setShowPaymentModal(true); }} className="flex-1 py-4 rounded-2xl border-2 border-neutral-200 text-neutral-600 font-semibold flex items-center justify-center gap-2">
-                      <ChevronLeft className="w-4 h-4" />Precedent
-                    </button>
-                    <button onClick={() => setSubmitted(true)} disabled={!mobileData.phone}
-                      className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:bg-neutral-200 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2">
-                      <Smartphone className="w-5 h-5" />Confirmer {finalAmount}€
-                    </button>
-                  </div>
                 </div>
               )}
             </div>

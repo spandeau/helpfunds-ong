@@ -2,14 +2,14 @@ export default {
   async afterUpdate(event) {
     const { result } = event;
 
-    if (result.status === "envoyee" && !result.sentAt) {
+    if (result.sendStatus === "envoyee" && !result.sentAt) {
       try {
         const subscribers = await strapi
           .documents("api::newsletter-subscriber.newsletter-subscriber")
           .findMany({
             filters: { active: true },
             fields: ["email"],
-            pageSize: 5000,
+            pagination: { pageSize: 5000 },
           });
 
         const emails = (subscribers || []).map((s) => s.email).filter(Boolean);

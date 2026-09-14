@@ -4,31 +4,6 @@ export interface NavLink {
   children?: NavLink[];
 }
 
-export type ProjectCategory =
-  | "education"
-  | "sante"
-  | "eau"
-  | "alimentation"
-  | "logement"
-  | "economie";
-
-export type ProjectStatus = "en-cours" | "termine" | "a-venir";
-
-export interface Project {
-  id: number;
-  title: string;
-  description: string;
-  shortDescription: string;
-  category: ProjectCategory;
-  status: ProjectStatus;
-  goalAmount: number;
-  raisedAmount: number;
-  beneficiaries: number;
-  country: string;
-  slug: string;
-  featured: boolean;
-}
-
 export interface Testimonial {
   id: number;
   name: string;

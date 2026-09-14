@@ -10,7 +10,7 @@
   "attributes": {
     "subject": { "type": "string", "required": true },
     "content": { "type": "text", "required": true },
-    "status": {
+    "sendStatus": {
       "type": "enumeration",
       "enum": ["brouillon", "envoyee"],
       "default": "brouillon",

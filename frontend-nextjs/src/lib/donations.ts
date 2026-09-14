@@ -7,8 +7,11 @@ export type DonationTransactionStatus =
   | "refunded"
   | "cancelled";
 
+export type DonationProvider = "stripe" | "paydunya";
+
 export interface CreatePendingDonationInput {
   paymentIntentId: string;
+  provider?: DonationProvider;
   amount: number;
   currency: string;
   donorFirstName?: string;
@@ -38,7 +41,7 @@ export async function createPendingDonationTransaction(
       amount: input.amount,
       currency: (input.currency || "EUR").toUpperCase(),
       paymentStatus: "pending",
-      paymentMethod: "stripe",
+      paymentMethod: input.provider || "stripe",
       donorFirstName: input.donorFirstName || "",
       donorLastName: input.donorLastName || "",
       donorEmail: input.donorEmail || "",
@@ -75,19 +78,19 @@ export async function createPendingDonationTransaction(
 }
 
 export async function markDonationTransactionStatus(
-  paymentIntentId: string,
+  transactionReference: string,
   status: DonationTransactionStatus
 ): Promise<DonationTransactionRecord | null> {
   try {
     const existing = await strapiClient.findOneByField<DonationTransactionRecord>(
       "donation-transactions",
       "reference",
-      paymentIntentId
+      transactionReference
     );
 
     if (!existing) {
       console.warn(
-        `[Donations] Aucune transaction trouvee pour ${paymentIntentId} (statut demande: ${status})`
+        `[Donations] Aucune transaction trouvee pour ${transactionReference} (statut demande: ${status})`
       );
       return null;
     }
@@ -99,20 +102,20 @@ export async function markDonationTransactionStatus(
     );
 
     if (status === "completed") {
-      await incrementCampaignIfLinked(existing.documentId, paymentIntentId);
+      await incrementCampaignIfLinked(existing.documentId, transactionReference);
     }
 
     return updated;
   } catch (error) {
     console.warn(
-      `[Donations] Erreur mise a jour statut pour ${paymentIntentId}:`,
+      `[Donations] Erreur mise a jour statut pour ${transactionReference}:`,
       error
     );
     return null;
   }
 }
 
-async function incrementCampaignIfLinked(transactionDocumentId: string, paymentIntentId: string) {
+async function incrementCampaignIfLinked(transactionDocumentId: string, transactionReference: string) {
   try {
     const result = await strapiClient.fetch<{
       data: {
@@ -134,6 +137,6 @@ async function incrementCampaignIfLinked(transactionDocumentId: string, paymentI
 
     console.log(`[Donations] Cagnotte ${full.campaign.documentId} mise a jour: +${full.amount} (total ${newRaised})`);
   } catch (error) {
-    console.warn(`[Donations] Erreur mise a jour cagnotte pour ${paymentIntentId}:`, error);
+    console.warn(`[Donations] Erreur mise a jour cagnotte pour ${transactionReference}:`, error);
   }
 }

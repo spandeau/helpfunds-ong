@@ -14,7 +14,7 @@
     "phone": { "type": "string" },
     "website": { "type": "string" },
     "message": { "type": "text", "required": true },
-    "status": {
+    "requestStatus": {
       "type": "enumeration",
       "enum": ["nouveau", "en-cours", "accepte", "refuse"],
       "default": "nouveau"
