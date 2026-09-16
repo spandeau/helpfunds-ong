@@ -15,8 +15,6 @@ import {
   Globe,
 } from "lucide-react";
 
-import { HOME_STATS } from "@/constants";
-
 interface Slide {
   id: number | string;
   badge: string;
@@ -26,6 +24,12 @@ interface Slide {
   cta: string;
   ctaHref: string;
   stat: { value: string; label: string };
+}
+
+interface HomeStat {
+  value: string;
+  label: string;
+  icon?: string;
 }
 
 const DEFAULT_SLIDES: Slide[] = [
@@ -61,6 +65,13 @@ const DEFAULT_SLIDES: Slide[] = [
   },
 ];
 
+const DEFAULT_HOME_STATS: HomeStat[] = [
+  { value: "50 000+", label: "Beneficiaires aides", icon: "users" },
+  { value: "120+", label: "Projets realises", icon: "folder" },
+  { value: "35", label: "Pays d intervention", icon: "globe" },
+  { value: "98%", label: "Fonds sur le terrain", icon: "heart" },
+];
+
 const iconMap = {
   users: Users,
   folder: BookOpen,
@@ -70,6 +81,7 @@ const iconMap = {
 
 export default function HeroSection() {
   const [slides, setSlides] = useState<Slide[]>(DEFAULT_SLIDES);
+  const [homeStats, setHomeStats] = useState<HomeStat[]>(DEFAULT_HOME_STATS);
   const [index, setIndex] = useState(0);
   const [offsetY, setOffsetY] = useState(0);
   const heroRef = useRef<HTMLElement>(null);
@@ -102,6 +114,23 @@ export default function HeroSection() {
         });
 
         setSlides(fromStrapi);
+      })
+      .catch(() => {});
+  }, [STRAPI_URL]);
+
+  useEffect(() => {
+    fetch(`${STRAPI_URL}/api/impact-stats?sort=order:asc&pagination[pageSize]=4`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.data && data.data.length > 0) {
+          setHomeStats(
+            data.data.map((s: any) => ({
+              value: s.value,
+              label: s.label,
+              icon: s.icon || "heart",
+            }))
+          );
+        }
       })
       .catch(() => {});
   }, [STRAPI_URL]);
@@ -265,7 +294,7 @@ export default function HeroSection() {
 
       <section className="bg-primary-950 py-8">
         <div className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-8 px-6">
-          {HOME_STATS.map((item) => {
+          {homeStats.map((item) => {
             const Icon = iconMap[item.icon as keyof typeof iconMap] || Heart;
             return (
               <div key={item.label} className="flex items-center gap-4">

@@ -1,12 +1,19 @@
 import Link from "next/link";
-import { Heart, ArrowRight, Users, Globe, TrendingUp, Shield, FileText } from "lucide-react";
+import { Heart, ArrowRight, Users, Globe, TrendingUp, Folder, Shield, FileText } from "lucide-react";
 
-const STATS = [
+const DEFAULT_STATS = [
   { icon: Users, value: "50 000+", label: "Beneficiaires" },
   { icon: Globe, value: "35", label: "Pays" },
   { icon: TrendingUp, value: "98%", label: "Sur le terrain" },
   { icon: Heart, value: "120+", label: "Projets" },
 ];
+
+const iconMap: Record<string, React.ElementType> = {
+  users: Users,
+  folder: Folder,
+  globe: Globe,
+  heart: Heart,
+};
 
 const AMOUNTS = [10, 25, 50, 100];
 
@@ -21,6 +28,12 @@ interface RecentDonation {
   name: string;
   amount: number;
   createdAt: string;
+}
+
+interface ImpactStat {
+  icon: React.ElementType;
+  value: string;
+  label: string;
 }
 
 function timeAgo(dateString: string): string {
@@ -51,8 +64,35 @@ async function getRecentDonations(): Promise<RecentDonation[]> {
   }
 }
 
+async function getImpactStats(): Promise<ImpactStat[]> {
+  try {
+    const strapiUrl = process.env.STRAPI_URL || process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+    const response = await fetch(strapiUrl + "/api/impact-stats?sort=order:asc&pagination[pageSize]=4", {
+      next: { revalidate: 60 },
+    });
+    if (!response.ok) {
+      throw new Error("Strapi status " + response.status);
+    }
+    const result = (await response.json()) as { data: { value: string; label: string; icon?: string }[] };
+    if (!result?.data || result.data.length === 0) {
+      return DEFAULT_STATS;
+    }
+    return result.data.map((s) => ({
+      icon: iconMap[s.icon || "heart"] || Heart,
+      value: s.value,
+      label: s.label,
+    }));
+  } catch (error) {
+    console.warn("[DonationCTA] Statistiques d impact indisponibles", error);
+    return DEFAULT_STATS;
+  }
+}
+
 export default async function DonationCTASection() {
-  const recentDonations = await getRecentDonations();
+  const [recentDonations, stats] = await Promise.all([
+    getRecentDonations(),
+    getImpactStats(),
+  ]);
 
   return (
     <section className="py-16 bg-neutral-50 border-t border-neutral-100">
@@ -72,7 +112,7 @@ export default async function DonationCTASection() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-          {STATS.map((stat) => (
+          {stats.map((stat) => (
             <div key={stat.label} className="bg-white border border-neutral-200 rounded-2xl p-5 flex items-center gap-3 hover:border-primary-200 hover:shadow-sm transition-all">
               <div className="w-10 h-10 bg-primary-50 rounded-xl flex items-center justify-center flex-shrink-0">
                 <stat.icon className="w-5 h-5 text-primary-600" />
